@@ -1,9 +1,11 @@
 namespace Galaxylist.Features.V1.Galaxies;
 
-using Models;
+using Lib.Models;
 
 public class GalaxyResponse
 {
+	public string? HubbleType { get; set; }
+	public required int UgcNumber { get; set; }
 	public required double Magnitude { get; set; }
 	public required RightAscention RightAscension { get; set; }
 	public required Declination Declination { get; set; }

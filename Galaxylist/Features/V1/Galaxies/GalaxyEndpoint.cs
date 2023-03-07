@@ -20,10 +20,12 @@ public class GalaxyEndpoint : Endpoint<EmptyRequest, List<GalaxyResponse>>
 		IEnumerable<Galaxy> galaxies = repo.Galaxies;
 		await SendAsync(galaxies.Select(galaxy => new GalaxyResponse
 									{
-										Declination = galaxy.Declination,
+										HubbleType = galaxy.HubbleType,
+										UgcNumber = galaxy.UgcNumber,
+										Declination = galaxy.EquatorialCoordinate.Declination,
 										Magnitude = galaxy.Magnitude,
 										PositionAngle = galaxy.PositionAngle,
-										RightAscension = galaxy.RightAscension,
+										RightAscension = galaxy.EquatorialCoordinate.RightAscention,
 										SemiMajorAxis = galaxy.SemiMajorAxis,
 										SemiMinorAxis = galaxy.SemiMinorAxis,
 									}

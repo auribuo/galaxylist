@@ -6,7 +6,11 @@ public class UgcDataRepo
 {
 	private UgcDataRepo() { }
 
-	public static UgcDataRepo New() => new();
+	public static UgcDataRepo New() => _instance ??= new UgcDataRepo();
+
+	private static UgcDataRepo? _instance;
+
+	private DateTime _lastFetch = DateTime.MinValue;
 
 	private List<UgcResponse> _ugcResponses = new();
 
@@ -35,6 +39,7 @@ public class UgcDataRepo
 		Kv("-c.geom", "r"),
 		Kv("-source", ""),
 		Kv("-source", "VII/26D/catalog VII/26D/errors"),
+		Kv("-out", "UGC"),
 		Kv("-out", "MajAxis"),
 		Kv("-out", "MinAxis"),
 		Kv("-out", "PA"),
@@ -55,7 +60,14 @@ public class UgcDataRepo
 
 	public async Task<UgcDataRepo> FetchAsync()
 	{
+		if (_lastFetch > DateTime.Now.AddDays(-1))
+		{
+			return this;
+		}
+
 		using HttpClient cli = new();
+
+		// https://vizier.unistra.fr/viz-bin/VizieR?-source=VII/26D&-to=3
 		HttpResponseMessage response =
 			await cli.PostAsync("https://vizier.unistra.fr/viz-bin/asu-txt", new FormUrlEncodedContent(_formFields));
 
@@ -63,24 +75,31 @@ public class UgcDataRepo
 		_ugcResponses = Parse(content)
 			.ToList();
 
+		_lastFetch = DateTime.Now;
+
 		return this;
 	}
 
 	public IEnumerable<Galaxy> Galaxies => _ugcResponses.Select(MapGalaxy);
 
 	public IEnumerable<Galaxy> HubbleTypedGalaxies =>
-		_ugcResponses.Where(response => !string.IsNullOrWhiteSpace(response.Hubble))
+		_ugcResponses.Where(response => !string.IsNullOrWhiteSpace(response.HubbleType))
 					 .Select(MapGalaxy);
 
 	private static Galaxy MapGalaxy(UgcResponse response) =>
 		new()
 		{
-			RightAscension = response.Ra!.Value,
-			Declination = response.Dec!.Value,
-			Magnitude = response.PMag,
-			PositionAngle = response.Pa,
-			SemiMajorAxis = response.MajAxis,
-			SemiMinorAxis = response.MinAxis,
+			UgcNumber = response.UgcNumber,
+			HubbleType = response.HubbleType,
+			EquatorialCoordinate = new EquatorialCoordinate
+			{
+				RightAscention = response.RightAscention!.Value,
+				Declination = response.Declination!.Value
+			},
+			Magnitude = response.Magnitude,
+			PositionAngle = response.PositionAlignment,
+			SemiMajorAxis = response.MajorAxis,
+			SemiMinorAxis = response.MinorAxis,
 		};
 
 	private static IEnumerable<UgcResponse> Parse(string content) =>
@@ -103,36 +122,25 @@ public class UgcDataRepo
 
 		return new UgcResponse
 		{
-			Ra = new RightAscention
+			RightAscention = new RightAscention
 			{
-				H = Convert.ToDouble(tokens[0]!.Split(" ")[0]),
-				M = Convert.ToDouble(tokens[0]!.Split(" ")[1]),
-				S = Convert.ToDouble(tokens[0]!.Split(" ")[2]),
+				Hours = Convert.ToDouble(tokens[0]!.Split(" ")[0]),
+				Minutes = Convert.ToDouble(tokens[0]!.Split(" ")[1]),
+				Seconds = Convert.ToDouble(tokens[0]!.Split(" ")[2]),
 			},
-			Dec = new Declination
+			Declination = new Declination
 			{
-				D = Convert.ToDouble(tokens[1]!.Split(" ")[0]),
-				M = Convert.ToDouble(tokens[1]!.Split(" ")[1]),
-				S = Convert.ToDouble(tokens[1]!.Split(" ")[2]),
+				Degrees = Convert.ToDouble(tokens[1]!.Split(" ")[0]),
+				Minutes = Convert.ToDouble(tokens[1]!.Split(" ")[1]),
+				Seconds = Convert.ToDouble(tokens[1]!.Split(" ")[2]),
 			},
-			MajAxis = Convert.ToDouble(tokens[2]),
-			MinAxis = Convert.ToDouble(tokens[3]),
-			Pa = Convert.ToDouble(tokens[4] ?? "-1"),
-			Hubble = tokens[5],
-			PMag = Convert.ToDouble(tokens[6]),
-			I = Convert.ToInt32(tokens[7] ?? "-1"),
+			UgcNumber = Convert.ToInt32(tokens[2]),
+			MajorAxis = Convert.ToDouble(tokens[3]),
+			MinorAxis = Convert.ToDouble(tokens[4]),
+			PositionAlignment = Convert.ToDouble(tokens[5] ?? "-1"),
+			HubbleType = tokens[6],
+			Magnitude = Convert.ToDouble(tokens[7]),
+			Inclination = Convert.ToInt32(tokens[8] ?? "-1"),
 		};
 	}
-}
-
-class UgcResponse
-{
-	public RightAscention? Ra { get; set; }
-	public Declination? Dec { get; set; }
-	public double MajAxis { get; set; }
-	public double MinAxis { get; set; }
-	public double Pa { get; set; }
-	public string? Hubble { get; set; }
-	public double PMag { get; set; }
-	public int I { get; set; }
 }

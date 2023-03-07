@@ -1,6 +1,6 @@
 namespace Galaxylist.Features.V1.Calculate;
 
-using Models;
+using Lib.Models;
 
 public class CalculateRequest
 {

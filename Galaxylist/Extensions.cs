@@ -14,7 +14,7 @@ public static class Extensions
 	{
 		int start = 0;
 		sliceLengths = sliceLengths.ToList();
-		List<string>? res = new List<string?>();
+		List<string?> res = new();
 
 		foreach (int length in sliceLengths)
 		{

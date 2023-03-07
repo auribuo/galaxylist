@@ -1,4 +1,4 @@
-namespace Galaxylist.Models;
+namespace Galaxylist.Lib.Models;
 
 public class Fov
 {
