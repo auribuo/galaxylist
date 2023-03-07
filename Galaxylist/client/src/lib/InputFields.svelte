@@ -107,11 +107,9 @@
         margin-right: 5px;
         white-space: nowrap;
     }
-
     .inputLabel {
         margin-right: 20px;
     }
-
     .input {
         width: 50px;
     }
