@@ -1,30 +1,25 @@
 namespace Galaxylist.Lib.Coordinates;
 
-using Models;
-
 // https://de.wikipedia.org/wiki/Sternzeit#Sternzeit_in_Greenwich
-//TODO Andere Orte Testen
+/// <summary>
+/// Class that contains methods to convert equatorial coordinates to azimuthal coordinates.
+/// </summary>
 public static class CoordinateConverter
 {
 	/// <summary>
-	/// Konvertiert äquatoriale Koordinaten in vom Standpunkt abhängige Horizontkoordinaten
+	/// Converts a <see cref="EquatorialCoordinate"/> to a <see cref="AzimuthalCoordinate"/> dependent of the location and time.
 	/// </summary>
-	/// <param name="dateTime">Zeitpunkt für Berechnung. WICHTIG: UTC!!</param>
-	/// <param name="longitude">Längengrad des Standortes</param>
-	/// <param name="altitude">Breitengrad des Standortes</param>
-	/// <param name="rightAscention">Rektazension der äquatorialen Koordinaten</param>
-	/// <param name="declination">Deklination der äquatorialen Koordinaten</param>
-	/// <returns>Gibt Tupel der Horizontkoordinaten (Hoehenwinkel, Azimut) in Grad zurück</returns>
-	public static AzimuthalCoordinate ConvEqToZen(
-		DateTime dateTime,
-		double longitude,
-		double altitude,
-		RightAscention rightAscention,
-		Declination declination
-	)
+	/// <param name="dateTime">Time of the calculation. Will be converted to UTC automatically</param>
+	/// <param name="location">Location of the calculation</param>
+	/// <param name="coordinate">The equatorial coordinate to convert</param>
+	/// <returns>The equivalent azimuthal coordinate based on the given location and time</returns>
+	public static AzimuthalCoordinate ConvEqToZen(DateTime dateTime, Location location, EquatorialCoordinate coordinate)
 	{
-		double rektaszension = rightAscention.ToDegree();
-		double deklination = declination.ToDegrees();
+		dateTime = dateTime.ToUniversalTime();
+		int longitude = location.Longitude;
+		int latitude = location.Latitude;
+		double rektaszension = coordinate.RightAscention.ToDegree();
+		double deklination = coordinate.Declination.ToDegrees();
 		double julianDate = ToJulianDate(dateTime);
 		double t = JulianDateDifferenceConstant(julianDate);
 		double gmst0 = Gmst(t);
@@ -38,21 +33,22 @@ public static class CoordinateConverter
 		// Addiere Uhrzeit zu Greenwich Sternzeit zum Zeitpunkt 0
 		double gmstT = (gmst0 + timeOfDayRect) % 360;
 		double lmst = Lmst(gmstT, longitude);
-		double stundenWinkel = (lmst - rektaszension);
+		double stundenWinkel = lmst - rektaszension;
 
 		// Berechnet Höhenwinkel in Radianten
-		double hoehenWinkel = Math.Asin(Math.Sin(DegToRad(deklination)) * Math.Sin(DegToRad(altitude)) +
-										Math.Cos(DegToRad(altitude)) * Math.Cos(DegToRad(deklination)) * Math.Cos(DegToRad(stundenWinkel))
+		double hoehenWinkel = Math.Asin(Math.Sin(DegToRad(deklination)) * Math.Sin(DegToRad(latitude)) +
+										Math.Cos(DegToRad(latitude)) * Math.Cos(DegToRad(deklination)) * Math.Cos(DegToRad(stundenWinkel))
 		);
 
 		// Berechnet Azimut in Radianten
-		double azimut = Math.Atan(Math.Sin(DegToRad(stundenWinkel)) / (Math.Sin(DegToRad(altitude)) * Math.Cos(DegToRad(stundenWinkel)) -
-																	   Math.Cos(DegToRad(altitude)) * Math.Tan(DegToRad(deklination)))
+		double azimut = Math.Atan(Math.Sin(DegToRad(stundenWinkel)) / (Math.Sin(DegToRad(latitude)) * Math.Cos(DegToRad(stundenWinkel)) -
+																	   Math.Cos(DegToRad(latitude)) * Math.Tan(DegToRad(deklination)))
 		);
 
 		// Kontrolliert ob sich Stundenwinkel und Azimut im selben Quadranten befinden.
 		// Ist dies der Fall, werden dem Azimut 180° addiert. (Arctan hat 2 Lösungen)
 		double azimutDeg = azimut * 180 / Math.PI;
+		azimutDeg = (azimutDeg + 360) % 360;
 
 		if (GetQudrant(azimutDeg) == GetQudrant(stundenWinkel))
 		{
@@ -79,12 +75,12 @@ public static class CoordinateConverter
 	}
 
 	/// <summary>
-	/// Berechnet Quadrant eines Winkels
+	/// Calculates the quadrant of an angle
 	/// </summary>
-	/// <returns>Quadrant des Winkels</returns>
-	private static int GetQudrant(double degree)
+	/// <returns>The quadrant of the given angle</returns>
+	private static int GetQudrant(double angle)
 	{
-		return (degree % 360) switch
+		return (angle % 360) switch
 		{
 			>= 0 and < 90    => 1,
 			>= 90 and < 180  => 2,
@@ -95,15 +91,17 @@ public static class CoordinateConverter
 	}
 
 	/// <summary>
-	/// Konvertiert Grad in Radianten
+	/// Converts the given angle in degrees to radians
+	/// <returns>The given angle in radians</returns>
 	/// </summary>
-	private static double DegToRad(double degree)
+	private static double DegToRad(double angle)
 	{
-		return degree * Math.PI / 180;
+		return angle * Math.PI / 180;
 	}
 
 	/// <summary>
-	/// Konvertiert Grad in Radianten
+	/// Converts the given angle in radians to degrees
+	/// <returns>The given angle in degrees</returns>
 	/// </summary>
 	private static double RadToDeg(double radians)
 	{
@@ -111,30 +109,30 @@ public static class CoordinateConverter
 	}
 
 	/// <summary>
-	/// Errechnet Sternzeit am Standort des Beobachters
+	/// Calculates the star time of the given location and time
 	/// </summary>
-	/// <param name="gmst">Sternzeit in Greenwich [°]</param>
-	/// <param name="longitude">Längengrad des Beobachters [°]</param>
-	/// <returns>Sternzeit beim Beobachter [°]</returns>
+	/// <param name="gmst">Star time in Greenwich in degrees</param>
+	/// <param name="longitude">Longitude of the observer in degrees</param>
+	/// <returns>Star time at the location of the observer in degrees</returns>
 	private static double Lmst(double gmst, double longitude)
 	{
 		return gmst + longitude;
 	}
 
 	/// <summary>
-	/// Berechnet Greenwicher Sternzeit aus T 
+	/// Calculats the Greenwich mean sidereal time from t
 	/// </summary>
-	/// <param name="T">Parameter T (siehe Wikipedia)</param>
-	/// <returns>Gibt Greenwicher Sternzeit zurück [°]</returns>
-	private static double Gmst(double T)
+	/// <param name="t">Parameter T (see Wikipedia)</param>
+	/// <returns>The Greenwich mean sidereal time in degrees</returns>
+	private static double Gmst(double t)
 	{
-		return 100.46061837 + 36000.770053608 * T + 0.000387933 * T * T - (T * T * T / 38710000);
+		return 100.46061837 + 36000.770053608 * t + 0.000387933 * t * t - (t * t * t / 38710000);
 	}
 
 	/// <summary>
-	/// Konvertiert ein Datum in die julianische Zeitrechnung
+	/// Converts a <see cref="DateTime"/> to a julian date
 	/// </summary>
-	/// <returns>Datum in julianischer Zeitrechnung</returns>
+	/// <returns>Date in julian date</returns>
 	private static double ToJulianDate(DateTime date)
 	{
 		// ToOADate konvertiert ein Datum zu OA Datum mit Referenz zum 30. Dezember 1899
@@ -144,9 +142,9 @@ public static class CoordinateConverter
 	}
 
 	/// <summary>
-	/// Berechnet T aus [Sternzeit in Greenwich] (https://de.wikipedia.org/wiki/Sternzeit#Sternzeit_in_Greenwich)
+	/// Calculates the parameter T from a given julian date (https://de.wikipedia.org/wiki/Sternzeit#Sternzeit_in_Greenwich)
 	/// </summary>
-	/// <param name="julianDate">Datum in julianischer Zeitrechnung</param>
+	/// <param name="julianDate">Julian date to use</param>
 	/// <returns>Variable T</returns>
 	private static double JulianDateDifferenceConstant(double julianDate)
 	{

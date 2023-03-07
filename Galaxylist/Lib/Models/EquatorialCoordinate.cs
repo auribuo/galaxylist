@@ -1,7 +1,18 @@
 namespace Galaxylist.Lib.Models;
 
+/// <summary>
+/// Represents a coordinate in the equatorial coordinate system.
+/// The variant used is the J2000 system.
+/// </summary>
 public class EquatorialCoordinate
 {
-	public RightAscention RightAscention { get; set; }
-	public Declination Declination { get; set; }
+	/// <summary>
+	/// The right ascention of the object in the sky.
+	/// </summary>
+	public RightAscention RightAscention { get; init; }
+
+	/// <summary>
+	/// The declination of the object in the sky.
+	/// </summary>
+	public Declination Declination { get; init; }
 }

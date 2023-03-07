@@ -1,15 +1,18 @@
 namespace Galaxylist.Features.V1.Galaxies;
 
-using Lib.Models;
-
+/// <summary>
+/// Class that represents the response of the <see cref="GalaxyEndpoint"/> endpoint. It contains the total number of galaxies and the list of galaxies parsed from the catalog.
+/// The galaxies are not calculated and have no azimuthal coordinates because they are location and time dependent.
+/// </summary>
 public class GalaxyResponse
 {
-	public string? HubbleType { get; set; }
-	public required int UgcNumber { get; set; }
-	public required double Magnitude { get; set; }
-	public required RightAscention RightAscension { get; set; }
-	public required Declination Declination { get; set; }
-	public required double SemiMajorAxis { get; set; }
-	public double SemiMinorAxis { get; set; }
-	public double PositionAngle { get; set; }
+	/// <summary>
+	/// Total number of galaxies in the catalog
+	/// </summary>
+	public required int Total { get; set; }
+	
+	/// <summary>
+	/// Galaxies parsed from the catalog
+	/// </summary>
+	public required List<Galaxy> Galaxies { get; set; }
 }
