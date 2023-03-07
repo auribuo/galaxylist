@@ -2,16 +2,22 @@
     import Button from '@smui/button'
     import DegreeInput from "./DegreeInput.svelte";
 
-    import { DateInput } from 'date-picker-svelte'
+    import {DateInput} from 'date-picker-svelte'
     import {CalculateRequest} from "../shared/CalculateRequest";
+    import {createEventDispatcher} from "svelte";
+
+    const dispatch = createEventDispatcher<{
+        submitted: CalculateRequest
+    }>();
+
+    function handleSubmitClick() {
+        dispatch('submitted', calculateRequest);
+    }
     
-    
-    export let  displayGalaxies: ()=>{};
     export let calculateRequest: CalculateRequest = new CalculateRequest()
 </script>
 
 <div id="inF">
-
     <div class="inputField degreeField">
         <label class="inputLabel degLabel">Längengrad: </label>
         <DegreeInput bind:degree={calculateRequest.location.longitude}></DegreeInput>
@@ -21,10 +27,11 @@
         <DegreeInput bind:degree={calculateRequest.location.latitude}></DegreeInput>
     </div>
 
-    
+
     <div class="inputField">
         <label class="inputLabel">Minimale Höhe</label>
-        <span class="symbol"><input min="0" max="180" class="input" id="minHeight" type="number" value="{calculateRequest.minimumHeight}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input" id="minHeight" type="number"
+                                    value="{calculateRequest.minimumHeight}"/> </span>
     </div>
 
     <div class="inputField">
@@ -42,39 +49,45 @@
 
     <div class="inputField">
         <label class="inputLabel">Brennweite</label>
-        <div  class="symbol"><input class="input"  type="number" id="focalLInput" value="{calculateRequest.telescope.focalLength}"/>mm</div>
+        <div class="symbol"><input class="input" type="number" id="focalLInput"
+                                   value="{calculateRequest.telescope.focalLength}"/>mm
+        </div>
     </div>
 
     <div class="inputField">
         <label class="inputLabel">FOV Höhe</label>
-        <span class="symbol"><input min="0" max="180" class="input fov"   id="fovHeight" type="number" value="{calculateRequest.fov.height}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input fov" id="fovHeight" type="number"
+                                    value="{calculateRequest.fov.height}"/> </span>
     </div>
 
     <div class="inputField">
         <label class="inputLabel">FOV Breite</label>
-        <span class="symbol"><input min="0" max="180" class="input fov" id="fovWidth" type="number" value="{calculateRequest.fov.width}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input fov" id="fovWidth" type="number"
+                                    value="{calculateRequest.fov.width}"/> </span>
     </div>
-    
-    
-    <Button on:click="{displayGalaxies}">Hole Galaxien</Button>
-    
+
+    <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
+
 </div>
 
 <style>
-    #focalLInput{
+    #focalLInput {
         width: 100%;
         margin-right: 5px;
         margin-left: 5px;
     }
-    #selectH{
+
+    #selectH {
         width: 100%;
         margin-right: 15px;
     }
+
     #inF {
         justify-content: flex-start;
         align-items: flex-start;
     }
-    .fov{
+
+    .fov {
         width: 100% !important;
     }
 
@@ -89,16 +102,19 @@
     .inputLabel {
         margin-right: 20px;
     }
-    .input{
+
+    .input {
         width: 50px;
     }
-    .symbol{
+
+    .symbol {
         display: flex;
         flex-wrap: nowrap;
         padding-right: 10px;
         width: 100%;
     }
-    #minHeight{
+
+    #minHeight {
         width: 100%;
     }
 </style>

@@ -24,12 +24,10 @@ app.UseFastEndpoints(config =>
 	}
 );
 
-
-app.UseCors(x => 
-	x.AllowAnyMethod()
-		.AllowAnyHeader()
-		.SetIsOriginAllowed(origin =>true).AllowCredentials());
-
+app.UseCors(x => x.AllowAnyMethod()
+				  .AllowAnyHeader()
+				  .AllowAnyOrigin()
+);
 
 app.UseSwaggerGen();
 app.Run();
