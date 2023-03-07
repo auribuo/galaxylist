@@ -2,20 +2,27 @@
     import Button from '@smui/button'
     import DegreeInput from "./DegreeInput.svelte";
 
-    import { DateInput } from 'date-picker-svelte'
+    import {DateInput} from 'date-picker-svelte'
     import {CalculateRequest} from "../shared/CalculateRequest";
+    import {createEventDispatcher} from "svelte";
     import Degree from "../shared/Degree";
     
-    
+    const dispatch = createEventDispatcher<{
+        submitted: CalculateRequest
+    }>();
+
+    function handleSubmitClick() {
+        dispatch('submitted', calculateRequest);
+    }
+
+
     let latitude: Degree = new Degree();
     let longitude: Degree = new Degree();
     
-    export let  displayGalaxies: ()=>{};
     export let calculateRequest: CalculateRequest = new CalculateRequest()
 </script>
 
 <div id="inF">
-
     <div class="inputField degreeField">
         <label class="inputLabel degLabel">Längengrad: </label>
         <DegreeInput bind:degree={longitude}></DegreeInput>
@@ -25,6 +32,8 @@
         <DegreeInput bind:degree={latitude}></DegreeInput>
     </div>
     
+
+
     <div class="inputField">
         <label class="inputLabel">Minimale Höhe</label>
         <span class="symbol"><input min="0" max="180" class="input" id="minHeight" type="number" bind:value="{calculateRequest.minimumHeight}"/> </span>
@@ -57,27 +66,29 @@
         <label class="inputLabel">FOV Breite</label>
         <span class="symbol"><input min="0" max="180" class="input fov" id="fovWidth" type="number" bind:value="{calculateRequest.fov.width}"/> </span>
     </div>
-    
-    
-    <Button on:click="{displayGalaxies}">Hole Galaxien</Button>
-    
+
+    <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
+
 </div>
 
 <style>
-    #focalLInput{
+    #focalLInput {
         width: 100%;
         margin-right: 5px;
         margin-left: 5px;
     }
-    #selectH{
+
+    #selectH {
         width: 100%;
         margin-right: 15px;
     }
+
     #inF {
         justify-content: flex-start;
         align-items: flex-start;
     }
-    .fov{
+
+    .fov {
         width: 100% !important;
     }
 
@@ -92,16 +103,19 @@
     .inputLabel {
         margin-right: 20px;
     }
-    .input{
+
+    .input {
         width: 50px;
     }
-    .symbol{
+
+    .symbol {
         display: flex;
         flex-wrap: nowrap;
         padding-right: 10px;
         width: 100%;
     }
-    #minHeight{
+
+    #minHeight {
         width: 100%;
     }
 </style>

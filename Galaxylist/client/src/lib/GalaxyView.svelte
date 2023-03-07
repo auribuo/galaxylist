@@ -1,87 +1,80 @@
 <script lang="ts">
     import InputFields from "./InputFields.svelte";
-    import {onMount} from "svelte";
     import {CalculateRequest} from "../shared/CalculateRequest";
     import * as  Plotly from 'plotly.js-basic-dist-min'
-    import type  {GalaxyResponse} from "../shared/GalaxyResponse";
+    import type {GalaxyResponse} from "../shared/GalaxyResponse";
     import axios from "axios";
-    
-    let calculateRequest = new CalculateRequest();
-    export let apiEndpoint: string =""
+    import type {Data} from "plotly.js-basic-dist-min";
+
+    export let apiEndpoint: string = ""
+
+    let loading: string = ""
+
+    let galaxies: GalaxyResponse | null;
 
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
-        
-        const resp = await axios.post<GalaxyResponse>(apiEndpoint,calculateRequest);
+        const resp = await axios.post<GalaxyResponse>(apiEndpoint, calculateRequest)
         return resp.data as GalaxyResponse
     }
 
-    const displayGalaxies = ()=> {
-        console.log(calculateRequest.minimumHeight)
-        
-        getGalaxies(calculateRequest).then((galaxies: GalaxyResponse) => {
-            console.log(galaxies.galaxies)
-        }).catch((error) => {
-            console.error(error)
+    const displayGalaxies = async (event: CustomEvent<CalculateRequest>) => {
+        galaxies = await getGalaxies(event.detail);
+
+        const traces: Data[] = galaxies.galaxies.map(galaxy => {
+            return {
+                x: [galaxy.azimuthalCoordinate.azimuth],
+                y: [galaxy.azimuthalCoordinate.height],
+                mode: 'markers',
+                type: 'scatter',
+                name: 'Galaxies',
+                text: [galaxy.toString()],
+                marker: {size: 10}
+            }
         })
+
+        const trace: Data = {
+            x: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.azimuth),
+            y: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.height),
+            mode: 'markers',
+            type: 'scatter',
+            name: 'Galaxies',
+            text: galaxies.galaxies.map(galaxy => galaxy.ugcNumber.toString()),
+            marker: {size: 10}
+        }
+
+        const layout = {
+            xaxis: {
+                range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
+            },
+            yaxis: {
+                range: [0, 90]
+            },
+            title: 'Data Labels Hover'
+        };
+        loading = "Loading..."
+        await Plotly.newPlot('galaxyPlot', [trace], layout);
+        loading = ""
     }
-    
-    var trace1 = {
-        x: [1, 2, 3, 4, 5],
-        y: [1, 6, 3, 6, 1],
-        mode: 'markers',
-        type: 'scatter',
-        name: 'Team A',
-        text: ['A-1', 'A-2', 'A-3', 'A-4', 'A-5'],
-        marker: { size: 12 }
-    };
-    
-    var trace2 = {
-        x: [1.5, 2.5, 3.5, 4.5, 5.5],
-        y: [4, 1, 7, 1, 4],
-        mode: 'markers',
-        type: 'scatter',
-        name: 'Team B',
-        text: ['B-a', 'B-b', 'B-c', 'B-d', 'B-e'],
-        marker: { size: 12 }
-    };
-
-
-    var data = [ trace1, trace2 ] as any; 
-
-    var layout = {
-        xaxis: {
-            range: [ 0.75, 5.25 ]
-        },
-        yaxis: {
-            range: [0, 8]
-        },
-        title:'Data Labels Hover'
-    };
-    onMount(()=>{
-        //@ts-ignore
-        Plotly.newPlot('galaxyPlot', data, layout);
-    })
 </script>
 
 <div id="galaxyView">
-    <InputFields 
-            bind:calculateRequest = {calculateRequest}
-            displayGalaxies = {displayGalaxies}
+    <InputFields
+            on:submitted={displayGalaxies}
     ></InputFields>
-    
+    <div>{loading}</div>
     <div id="galaxyPlot"></div>
-
 </div>
 
 <style>
-    #galaxyView{
+    #galaxyView {
         display: flex;
         flex-direction: row;
     }
-    #galaxyPlot{
+
+    #galaxyPlot {
         height: 100%;
         background-color: red;
     }
-    
-    
+
+
 </style>
