@@ -3,32 +3,41 @@ namespace Galaxylist.Features.V1.Galaxies;
 using Lib.Data;
 using Lib.Data.Ugc;
 
-public class GalaxyEndpoint : Endpoint<EmptyRequest, List<GalaxyResponse>>
+/// <summary>
+/// Endpoint that returns a list of all used galaxies.
+/// Conforms to the UGC catalog.
+/// </summary>
+public class GalaxyEndpoint : Endpoint<EmptyRequest, GalaxyResponse>
 {
+	/// <summary>
+	/// <inheritdoc cref="BaseEndpoint.Configure"/>
+	/// </summary>
 	public override void Configure()
 	{
 		Get("/galaxies");
-		Version(1);
+		Description(endpoint =>
+			{
+				endpoint.Produces<GalaxyResponse>(200, "application/json");
+			}
+		);
+
 		AllowAnonymous();
 	}
 
+	/// <summary>
+	/// <inheritdoc cref="FastEndpoints.Endpoint{TRequest,TResponse}.HandleAsync"/>
+	/// </summary>
+	/// <param name="req">Request dto</param>
+	/// <param name="ct">Cancellation token</param>
 	public override async Task HandleAsync(EmptyRequest req, CancellationToken ct)
 	{
-		UgcDataRepo repo = await UgcDataRepo.New()
-											.FetchAsync();
-
-		IEnumerable<Galaxy> galaxies = repo.Galaxies;
-		await SendAsync(galaxies.Select(galaxy => new GalaxyResponse
-									{
-										Declination = galaxy.Declination,
-										Magnitude = galaxy.Magnitude,
-										PositionAngle = galaxy.PositionAngle,
-										RightAscension = galaxy.RightAscension,
-										SemiMajorAxis = galaxy.SemiMajorAxis,
-										SemiMinorAxis = galaxy.SemiMinorAxis,
-									}
-								)
-								.ToList()
+		UgcDataRepo repo = UgcDataRepo.New();
+		List<Galaxy> galaxies = repo.Galaxies.ToList();
+		await SendAsync(new GalaxyResponse
+			{
+				Total = galaxies.Count,
+				Galaxies = galaxies,
+			}
 		);
 	}
 }
