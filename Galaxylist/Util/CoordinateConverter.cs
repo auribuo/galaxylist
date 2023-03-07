@@ -3,19 +3,19 @@ namespace Galaxylist.Util;
 
 // https://de.wikipedia.org/wiki/Sternzeit#Sternzeit_in_Greenwich
 //TODO Andere Orte Testen
-public class CoordinateConverter
+public static   class CoordinateConverter
 {
 
     /// <summary>
     /// Konvertiert äquatoriale Koordinaten in vom Standpunkt abhängige Horizontkoordinaten
     /// </summary>
-    /// <param name="dateTime">Zeitpunkt der Berechnung UTC</param>
+    /// <param name="dateTime">Zeitpunkt für Berechnung. WICHTIG: UTC!!</param>
     /// <param name="longitude">Längengrad des Standortes</param>
     /// <param name="altitude">Breitengrad des Standortes</param>
-    /// <param name="rektazension">Rektazension der äquatorialen Koordinaten</param>
+    /// <param name="rektaszension">Rektazension der äquatorialen Koordinaten</param>
     /// <param name="deklination">Deklination der äquatorialen Koordinaten</param>
     /// <returns>Gibt Tupel der Horizontkoordinaten (Hoehenwinkel, Azimut) in Grad zurück</returns>
-    public static Tuple<double, double> ConvEqToZen(DateTime dateTime,  double longitude, double altitude,  double rektazension, double deklination)
+    public static  Tuple<double, double> ConvEqToZen(DateTime dateTime,  double longitude, double altitude,  double rektaszension, double deklination)
     {
         var julianDate = ToJulianDate(dateTime);
         var t = JulianDateDifferenceConstant(julianDate);
@@ -32,9 +32,8 @@ public class CoordinateConverter
         var gmstT = (gmst0 + timeOfDayRect) % 360;
 
         
-        // 
         var lmst = LMST(gmstT, longitude);
-        var stundenWinkel = (lmst - rektazension);
+        var stundenWinkel = (lmst - rektaszension);
         
 
         
@@ -55,13 +54,16 @@ public class CoordinateConverter
              )
         );
 
+        
+        // Kontrolliert ob sich Stundenwinkel und Azimut im selben Quadranten befinden.
+        // Ist dies der Fall, werden dem Azimut 180° addiert. (Arctan hat 2 Lösungen)
         var azimutDeg = azimut * 180 / Math.PI;
         if (GetQudrant(azimutDeg) == GetQudrant(stundenWinkel))
         {
             azimutDeg = (azimutDeg + 180) % 360;
         }
         
-        Console.WriteLine("T: "+t);
+        /*Console.WriteLine("T: "+ t);
         Console.WriteLine("Greenwich time: "+ gmstT);
         Console.WriteLine("Datum: "+ julianDate);
         Console.WriteLine("Deklination: "+ deklination);
@@ -70,12 +72,10 @@ public class CoordinateConverter
         Console.WriteLine("Stundenwinkel: "+stundenWinkel);
         Console.WriteLine("Hoehenwinkel in Rad: "+hoehenWinkel);
         Console.WriteLine("Azimut in Rad: "+azimut);
-        Console.WriteLine("Hohenwinkel in Grad: "+ hoehenWinkel * 180/Math.PI);
-        Console.WriteLine("Azimut in Grad: "+ azimutDeg);
-        
-        
-        
-        return new Tuple<double, double>(hoehenWinkel*180/Math.PI, azimutDeg);
+        Console.WriteLine("Hohenwinkel in Grad: "+ RadToDeg(hoehenWinkel));
+        Console.WriteLine("Azimut in Grad: "+ azimutDeg);*/
+
+        return new Tuple<double, double>(RadToDeg(hoehenWinkel), azimutDeg);
     }
 
 
@@ -106,6 +106,15 @@ public class CoordinateConverter
     {
         return degree * Math.PI / 180;
     }
+    
+    /// <summary>
+    /// Konvertiert Grad in Radianten
+    /// </summary>
+    private static double RadToDeg(double radians)
+    {
+        return radians * 180 / Math.PI;
+    }
+    
     /// <summary>
     /// Errechnet Sternzeit am Standort des Beobachters
     /// </summary>
