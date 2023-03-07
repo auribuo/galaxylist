@@ -4,20 +4,20 @@
     import {CalculateRequest} from "../shared/CalculateRequest";
     import * as  Plotly from 'plotly.js-basic-dist-min'
     import type  {GalaxyResponse} from "../shared/GalaxyResponse";
+    import axios from "axios";
     
     let calculateRequest = new CalculateRequest();
     export let apiEndpoint: string =""
 
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
         
-        //@ts-ignore
-        return await (await fetch(apiEndpoint,{
-            method: "POST",
-            body: JSON.stringify(calculateRequest)
-        })).json()
+        const resp = await axios.post<GalaxyResponse>(apiEndpoint,calculateRequest);
+        return resp.data as GalaxyResponse
     }
 
     const displayGalaxies = ()=> {
+        console.log(calculateRequest.minimumHeight)
+        
         getGalaxies(calculateRequest).then((galaxies: GalaxyResponse) => {
             console.log(galaxies.galaxies)
         }).catch((error) => {

@@ -7,11 +7,11 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints(); // auto-discover endpoints
 builder.Services.AddCors();
 builder.Services.AddSwaggerDoc(swaggerSettings =>
-							   {
-								   swaggerSettings.Title = "Galaxylist";
-								   swaggerSettings.Version = "v1";
-							   },
-							   shortSchemaNames: true
+		   {
+			   swaggerSettings.Title = "Galaxylist";
+			   swaggerSettings.Version = "v1";
+		   },
+		   shortSchemaNames: true
 );
 
 WebApplication app = builder.Build();
@@ -25,10 +25,10 @@ app.UseFastEndpoints(config =>
 );
 
 
-app.UseCors(x => 
+app.UseCors(x =>
 	x.AllowAnyMethod()
 		.AllowAnyHeader()
-		.SetIsOriginAllowed(origin =>true).AllowCredentials());
+		.AllowAnyOrigin());
 
 
 app.UseSwaggerGen();

@@ -4,7 +4,11 @@
 
     import { DateInput } from 'date-picker-svelte'
     import {CalculateRequest} from "../shared/CalculateRequest";
+    import Degree from "../shared/Degree";
     
+    
+    let latitude: Degree = new Degree();
+    let longitude: Degree = new Degree();
     
     export let  displayGalaxies: ()=>{};
     export let calculateRequest: CalculateRequest = new CalculateRequest()
@@ -14,17 +18,16 @@
 
     <div class="inputField degreeField">
         <label class="inputLabel degLabel">Längengrad: </label>
-        <DegreeInput bind:degree={calculateRequest.location.longitude}></DegreeInput>
+        <DegreeInput bind:degree={longitude}></DegreeInput>
     </div>
     <div class="inputField degreeField">
         <label class="inputLabel degLabel">Breitengrad: </label>
-        <DegreeInput bind:degree={calculateRequest.location.latitude}></DegreeInput>
+        <DegreeInput bind:degree={latitude}></DegreeInput>
     </div>
-
     
     <div class="inputField">
         <label class="inputLabel">Minimale Höhe</label>
-        <span class="symbol"><input min="0" max="180" class="input" id="minHeight" type="number" value="{calculateRequest.minimumHeight}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input" id="minHeight" type="number" bind:value="{calculateRequest.minimumHeight}"/> </span>
     </div>
 
     <div class="inputField">
@@ -42,17 +45,17 @@
 
     <div class="inputField">
         <label class="inputLabel">Brennweite</label>
-        <div  class="symbol"><input class="input"  type="number" id="focalLInput" value="{calculateRequest.telescope.focalLength}"/>mm</div>
+        <div  class="symbol"><input class="input"  type="number" id="focalLInput" bind:value="{calculateRequest.telescope.focalLength}"/>mm</div>
     </div>
 
     <div class="inputField">
         <label class="inputLabel">FOV Höhe</label>
-        <span class="symbol"><input min="0" max="180" class="input fov"   id="fovHeight" type="number" value="{calculateRequest.fov.height}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input fov"   id="fovHeight" type="number" bind:value="{calculateRequest.fov.height}"/> </span>
     </div>
 
     <div class="inputField">
         <label class="inputLabel">FOV Breite</label>
-        <span class="symbol"><input min="0" max="180" class="input fov" id="fovWidth" type="number" value="{calculateRequest.fov.width}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input fov" id="fovWidth" type="number" bind:value="{calculateRequest.fov.width}"/> </span>
     </div>
     
     
