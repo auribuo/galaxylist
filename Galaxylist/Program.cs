@@ -1,5 +1,6 @@
 global using FastEndpoints;
 using Galaxylist.Lib;
+using Galaxylist.Util;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints();
@@ -15,5 +16,9 @@ app.UseFastEndpoints(config =>
 		config.Versioning.PrependToRoute = true;
 	}
 );
+
+
+
+
 
 app.Run();
