@@ -4,7 +4,9 @@ using Galaxylist.Util;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints();
+builder.Services.AddCors();
 builder.Services.AddSingleton<IGalaxyCalculator, GalaxyCalculator>();
+
 WebApplication app = builder.Build();
 app.UseAuthorization();
 app.UseFastEndpoints(config =>
@@ -18,6 +20,10 @@ app.UseFastEndpoints(config =>
 );
 
 
+app.UseCors(x => 
+	x.AllowAnyMethod()
+		.AllowAnyHeader()
+		.SetIsOriginAllowed(origin =>true).AllowCredentials());
 
 
 
