@@ -32,6 +32,7 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 	/// <param name="ct">Cancellation token</param>
 	public override async Task HandleAsync(CalculateRequest req, CancellationToken ct)
 	{
+		int limit = Query<int>("limit", false);
 		FilterPipeline<Galaxy> pipeline = FilterPipeline<Galaxy>.New()
 																.With(new PositionFilter(req.MinimumHeight))
 																.With(new MeridianFilter(req.Hemisphere));
@@ -52,6 +53,12 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 
 		List<Galaxy> galaxyList = pipeline.Filter(galaxies)
 										  .ToList();
+
+		if (limit != 0)
+		{
+			galaxyList = galaxyList.Take(limit)
+								   .ToList();
+		}
 
 		await SendAsync(new CalculateResponse
 			{

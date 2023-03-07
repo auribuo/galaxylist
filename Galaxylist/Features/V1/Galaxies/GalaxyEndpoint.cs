@@ -31,8 +31,16 @@ public class GalaxyEndpoint : Endpoint<EmptyRequest, GalaxyResponse>
 	/// <param name="ct">Cancellation token</param>
 	public override async Task HandleAsync(EmptyRequest req, CancellationToken ct)
 	{
+		int limit = Query<int>("limit", false);
 		UgcDataRepo repo = UgcDataRepo.New();
 		List<Galaxy> galaxies = repo.Galaxies.ToList();
+
+		if (limit != 0)
+		{
+			galaxies = galaxies.Take(limit)
+							   .ToList();
+		}
+
 		await SendAsync(new GalaxyResponse
 			{
 				Total = galaxies.Count,

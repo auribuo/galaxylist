@@ -11,9 +11,11 @@
   },
   "devDependencies": {
     "@smui/button": "^7.0.0-beta.0",
+    "@smui/textfield": "^7.0.0-beta.0",
     "@sveltejs/vite-plugin-svelte": "^2.0.2",
     "@tsconfig/svelte": "^3.0.0",
     "@types/plotly.js": "^2.12.18",
+    "date-picker-svelte": "^2.2.5",
     "svelte": "^3.55.1",
     "svelte-check": "^2.10.3",
     "tslib": "^2.5.0",
