@@ -6,29 +6,36 @@
     import {CalculateRequest} from "../shared/CalculateRequest";
     import {createEventDispatcher} from "svelte";
     import Degree from "../shared/Degree";
+    import {Converter} from "../shared/Converter";
     
     const dispatch = createEventDispatcher<{
         submitted: CalculateRequest
     }>();
 
+
+
+    export let latitude: Degree = new Degree();
+    export let longitude: Degree = new Degree();
+    
     function handleSubmitClick() {
+        
+        calculateRequest.location.longitude = Converter.degreeComponentsToDegree(longitude)
+        calculateRequest.location.latitude = Converter.degreeComponentsToDegree(latitude)
+        
         dispatch('submitted', calculateRequest);
     }
 
-
-    let latitude: Degree = new Degree();
-    let longitude: Degree = new Degree();
     
     export let calculateRequest: CalculateRequest = new CalculateRequest()
 </script>
 
 <div id="inF">
     <div class="inputField degreeField">
-        <label class="inputLabel degLabel">Längengrad: </label>
+        <label class="inputLabel degLabel">Längengrad </label>
         <DegreeInput bind:degree={longitude}></DegreeInput>
     </div>
     <div class="inputField degreeField">
-        <label class="inputLabel degLabel">Breitengrad: </label>
+        <label class="inputLabel degLabel">Breitengrad </label>
         <DegreeInput bind:degree={latitude}></DegreeInput>
     </div>
     
@@ -66,6 +73,7 @@
         <label class="inputLabel">FOV Breite</label>
         <span class="symbol"><input min="0" max="180" class="input fov" id="fovWidth" type="number" bind:value="{calculateRequest.fov.width}"/> </span>
     </div>
+        
 
     <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
 

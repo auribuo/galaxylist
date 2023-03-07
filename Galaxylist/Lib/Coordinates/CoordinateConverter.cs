@@ -16,8 +16,8 @@ public static class CoordinateConverter
 	public static AzimuthalCoordinate ConvEqToZen(DateTime dateTime, Location location, EquatorialCoordinate coordinate)
 	{
 		dateTime = dateTime.ToUniversalTime();
-		int longitude = location.Longitude;
-		int latitude = location.Latitude;
+		double longitude = location.Longitude;
+		double latitude = location.Latitude;
 		double rektaszension = coordinate.RightAscention.ToDegree();
 		double deklination = coordinate.Declination.ToDegrees();
 		double julianDate = ToJulianDate(dateTime);
