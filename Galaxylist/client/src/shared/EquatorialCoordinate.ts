@@ -1,7 +1,7 @@
-import type {RightAscention} from "./RightAscention";
+import type {RightAscension} from "./RightAscension";
 import type {Declination} from "./Declination";
 
 export class EquatorialCoordinate {
-    rightAscention: RightAscention
+    rightAscension: RightAscension
     declination: Declination
 }

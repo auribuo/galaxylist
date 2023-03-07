@@ -1,4 +1,4 @@
-export interface RightAscention{
+export interface RightAscension {
     H: number;
     M: number;
     S: number;
