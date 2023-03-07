@@ -1,7 +1,26 @@
 <script lang="ts">
     import InputFields from "./InputFields.svelte";
-    import Plotly from 'plotly.js-dist-min'
     import {onMount} from "svelte";
+    import {CalculateRequest} from "../shared/CalculateRequest";
+    import * as  Plotly from 'plotly.js-basic-dist-min'
+    import type  {GalaxyResponse} from "../shared/GalaxyResponse";
+    
+    let calculateRequest = new CalculateRequest();
+    
+
+    async function getGalaxies(): Promise<GalaxyResponse> {
+        //@ts-ignore
+        return await (await fetch("http://localhost:5244/api/galaxies")).json()
+    }
+
+    const displayGalaxies = ()=> {
+        getGalaxies().then((galaxies: GalaxyResponse) => {
+            console.log(galaxies.galaxies)
+        }).catch((error) => {
+            console.error(error)
+        })
+    }
+    
     var trace1 = {
         x: [1, 2, 3, 4, 5],
         y: [1, 6, 3, 6, 1],
@@ -23,7 +42,7 @@
     };
 
 
-    var data = [ trace1, trace2 ];
+    var data = [ trace1, trace2 ] as any; 
 
     var layout = {
         xaxis: {
@@ -35,18 +54,18 @@
         title:'Data Labels Hover'
     };
     onMount(()=>{
-
-        //@ts-ignore
         Plotly.newPlot('galaxyPlot', data, layout);
     })
 </script>
 
 <div id="galaxyView">
-    <InputFields ></InputFields>
+    <InputFields 
+            bind:calculateRequest = {calculateRequest}
+            displayGalaxies = {displayGalaxies}
+    ></InputFields>
     
     <div id="galaxyPlot"></div>
-    
-    
+
 </div>
 
 <style>
@@ -56,7 +75,6 @@
     }
     #galaxyPlot{
         height: 100%;
-
         background-color: red;
     }
     

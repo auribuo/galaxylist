@@ -1,89 +1,40 @@
 <script lang="ts">
     import Button from '@smui/button'
-    import TextField from '@smui/textfield'
-    import {Galaxy} from "../shared/Galaxy";
     import DegreeInput from "./DegreeInput.svelte";
-    import Degree from "../shared/Degree";
+
     import { DateInput } from 'date-picker-svelte'
+    import {CalculateRequest} from "../shared/CalculateRequest";
     
-    async function getGalaxies(): Promise<Galaxy[]> {
-        //@ts-ignore
-        return await (await fetch("http://localhost:5244/api/v1/galaxies")).json()
-    }
-
-    function displayGalaxies() {
-
-        getGalaxies().then((galaxies: Galaxy[]) => {
-            console.log(galaxies)
-            console.log(galaxies[0].declination.M)
-        }).catch((error) => {
-            console.error(error)
-        })
-
-    }
     
-    let hemispheres = ["E", "W"]
-    
-    let longitude: Degree = new Degree();
-    let altitude: Degree = new Degree();
-    let minHeight: number=30;
-    let observationStart: Date = new Date();
-    let hemisphere: "E"|"W" = "E";
-    let focalLength: number=200;
-    let fovHeight: number = 0.5;
-    let fovWidth: number = 0.8;
+    export let  displayGalaxies: ()=>{};
+    export let calculateRequest: CalculateRequest = new CalculateRequest()
 </script>
-
-
-<!-- 
-
-
-{
-   "observationStart": "2023-08-21T00:00:00+02:00",
-   "minimumHeight": 30,
-   "hemisphere": "E",
-   "location": {
-       "longitude": 12,
-       "latitude": 47
-   },
-   "telescope": {
-       "focalLength": 0,
-       "aperture": 0
-   },
-   "fov": {
-       "width": 10,
-       "height": 10
-   }
-}
-
-
--->
 
 <div id="inF">
 
     <div class="inputField degreeField">
         <label class="inputLabel degLabel">Längengrad: </label>
-        <DegreeInput bind:degree={longitude}></DegreeInput>
+        <DegreeInput bind:degree={calculateRequest.location.longitude}></DegreeInput>
     </div>
     <div class="inputField degreeField">
         <label class="inputLabel degLabel">Breitengrad: </label>
-        <DegreeInput bind:degree={altitude}></DegreeInput>
+        <DegreeInput bind:degree={calculateRequest.location.latitude}></DegreeInput>
     </div>
 
     
     <div class="inputField">
         <label class="inputLabel">Minimale Höhe</label>
-        <span class="symbol"><input min="0" max="180" class="input" id="minHeight" type="number" value="{minHeight}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input" id="minHeight" type="number" value="{calculateRequest.minimumHeight}"/> </span>
     </div>
 
     <div class="inputField">
         <label class="inputLabel">Start der Observation</label>
-        <DateInput bind:value={observationStart}></DateInput>
+        <DateInput bind:value={calculateRequest.observationStart}></DateInput>
     </div>
 
     <div class="inputField">
         <label class="inputLabel">Hemisphäre</label>
-        <select id="selectH" bind:value={hemisphere}>
+        <select id="selectH" bind:value={calculateRequest.hemisphere}>
             <option value="E">Osten</option>
             <option value="W">Westen</option>
         </select>
@@ -91,17 +42,17 @@
 
     <div class="inputField">
         <label class="inputLabel">Brennweite</label>
-        <div  class="symbol"><input class="input"  type="number" id="focalLInput" value="{focalLength}"/>mm</div>
+        <div  class="symbol"><input class="input"  type="number" id="focalLInput" value="{calculateRequest.telescope.focalLength}"/>mm</div>
     </div>
 
     <div class="inputField">
         <label class="inputLabel">FOV Höhe</label>
-        <span class="symbol"><input min="0" max="180" class="input fov"   id="fovHeight" type="number" value="{fovHeight}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input fov"   id="fovHeight" type="number" value="{calculateRequest.fov.height}"/> </span>
     </div>
 
     <div class="inputField">
         <label class="inputLabel">FOV Breite</label>
-        <span class="symbol"><input min="0" max="180" class="input fov" id="fovWidth" type="number" value="{fovWidth}"/> </span>
+        <span class="symbol"><input min="0" max="180" class="input fov" id="fovWidth" type="number" value="{calculateRequest.fov.width}"/> </span>
     </div>
     
     
