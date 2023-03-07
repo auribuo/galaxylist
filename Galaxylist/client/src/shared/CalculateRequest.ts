@@ -4,10 +4,11 @@ import type {Fov} from "./Fov";
 
 
 export class CalculateRequest {
-    observationStart: Date = new Date("2023-08-21T00:00:00+02:00");
+    observationStart: string = ""
+    observationStartDate: Date = new Date("2023-02-21T00:00:00Z");
     location: LocationCoordinates = {
-        latitude: 47,
-        longitude: 12
+        latitude: -34,
+        longitude: 151
     };
     telescope: Telescope = {
         focalLength: 0,

@@ -5,15 +5,17 @@
     import {DateInput} from 'date-picker-svelte'
     import {CalculateRequest} from "../shared/CalculateRequest";
     import {createEventDispatcher} from "svelte";
+    import {TimeZoneConverter} from "../shared/TimeZoneConverter";
 
     const dispatch = createEventDispatcher<{
         submitted: CalculateRequest
     }>();
 
-    function handleSubmitClick() {
+    async function handleSubmitClick() {
+        calculateRequest.observationStart = await TimeZoneConverter.toUtc(calculateRequest.observationStartDate, calculateRequest.location)
         dispatch('submitted', calculateRequest);
     }
-    
+
     export let calculateRequest: CalculateRequest = new CalculateRequest()
 </script>
 
@@ -36,7 +38,7 @@
 
     <div class="inputField">
         <label class="inputLabel">Start der Observation</label>
-        <DateInput bind:value={calculateRequest.observationStart}></DateInput>
+        <DateInput bind:value={calculateRequest.observationStartDate}></DateInput>
     </div>
 
     <div class="inputField">
