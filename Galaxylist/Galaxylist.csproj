@@ -9,11 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FastEndpoints" Version="5.8.0"/>
-        <PackageReference Include="FastEndpoints.Swagger" Version="5.8.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3"/>
-        <PackageReference Include="Pathoschild.Http.FluentClient" Version="4.2.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="FastEndpoints" Version="5.8.0" />
+        <PackageReference Include="FastEndpoints.Swagger" Version="5.8.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
+        <PackageReference Include="Pathoschild.Http.FluentClient" Version="4.2.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Lib\Filter\Weighted"/>
+        <Folder Include="Lib\Filter\Weighted" />
     </ItemGroup>
 
 </Project>
