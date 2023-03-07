@@ -6,15 +6,19 @@
     import type  {GalaxyResponse} from "../shared/GalaxyResponse";
     
     let calculateRequest = new CalculateRequest();
-    
+    export let apiEndpoint: string =""
 
-    async function getGalaxies(): Promise<GalaxyResponse> {
+    async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
+        
         //@ts-ignore
-        return await (await fetch("http://localhost:5244/api/galaxies")).json()
+        return await (await fetch(apiEndpoint,{
+            method: "POST",
+            body: JSON.stringify(calculateRequest)
+        })).json()
     }
 
     const displayGalaxies = ()=> {
-        getGalaxies().then((galaxies: GalaxyResponse) => {
+        getGalaxies(calculateRequest).then((galaxies: GalaxyResponse) => {
             console.log(galaxies.galaxies)
         }).catch((error) => {
             console.error(error)
@@ -54,6 +58,7 @@
         title:'Data Labels Hover'
     };
     onMount(()=>{
+        //@ts-ignore
         Plotly.newPlot('galaxyPlot', data, layout);
     })
 </script>

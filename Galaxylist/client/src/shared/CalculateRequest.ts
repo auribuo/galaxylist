@@ -19,6 +19,6 @@ export class CalculateRequest {
         height: 0,
         positionAngle: 0
     };
-    minimumHeight: number;
-    hemisphere: "W"| "E";
+    minimumHeight: number=0;
+    hemisphere: "W"| "E"="W";
 }
