@@ -5,6 +5,8 @@
     import {DateInput} from 'date-picker-svelte'
     import {CalculateRequest} from "../shared/CalculateRequest";
     import {createEventDispatcher} from "svelte";
+    import {TimeZoneConverter} from "../shared/TimeZoneConverter";
+
     import Degree from "../shared/Degree";
     import {Converter} from "../shared/Converter";
     
@@ -17,8 +19,9 @@
     export let latitude: Degree = new Degree();
     export let longitude: Degree = new Degree();
     
-    function handleSubmitClick() {
-        
+    async function handleSubmitClick() {
+        calculateRequest.observationStart = await TimeZoneConverter.toUtc(calculateRequest.observationStartDate, calculateRequest.location)
+
         calculateRequest.location.longitude = Converter.degreeComponentsToDegree(longitude)
         calculateRequest.location.latitude = Converter.degreeComponentsToDegree(latitude)
         
@@ -26,6 +29,7 @@
     }
 
     
+
     export let calculateRequest: CalculateRequest = new CalculateRequest()
 </script>
 
@@ -48,7 +52,7 @@
 
     <div class="inputField">
         <label class="inputLabel">Start der Observation</label>
-        <DateInput bind:value={calculateRequest.observationStart}></DateInput>
+        <DateInput bind:value={calculateRequest.observationStartDate}></DateInput>
     </div>
 
     <div class="inputField">
