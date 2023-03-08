@@ -1,6 +1,6 @@
 import type {Declination} from "./Declination";
 import type {RightAscension} from "./RightAscension";
-import type Degree from "./Degree";
+import  Degree from "./Degree";
 
 export let Converter= {
      declinationToDegree(rightAscension: RightAscension) {
@@ -12,6 +12,13 @@ export let Converter= {
         } else {
             return degree.D + degree.M / 60 + degree.S / 3600;
         }
+    },
+    degreeToDegreeComponents(degree: number){
+        let deg: Degree = new Degree();
+        deg.D = Math.floor(degree)
+        deg.M = Math.floor(((degree-deg.D)*60))
+        deg.S = Math.floor((degree-deg.D - deg.M)*360)
+        return deg;
     },
 
     rightAscensionToDegree(declination: Declination) {
