@@ -6,6 +6,7 @@ global using Galaxylist.Lib.Filter;
 global using Galaxylist.Lib.Filter.Absolute;
 global using Galaxylist.Lib.Extensions;
 using FastEndpoints.Swagger;
+using Galaxylist.Features.V1.Galaxies;
 
 namespace Galaxylist;
 
@@ -47,6 +48,7 @@ public static class Program
 		);
 
 		app.UseSwaggerGen();
+
 		app.Run();
 	}
 }

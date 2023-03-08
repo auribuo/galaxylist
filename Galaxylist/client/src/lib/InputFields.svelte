@@ -10,24 +10,33 @@
 
     import Degree from "../shared/Degree";
     import {Converter} from "../shared/Converter";
+    import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
+    import {FovViewPort} from "../shared/FovViewPort";
 
     const dispatch = createEventDispatcher<{
-        submitted: CalculateRequest
+        submitted: CalculateRequest,
+        updateFov: FovViewPort
     }>();
     export let calculateRequest: CalculateRequest = new CalculateRequest()
 
     export let latitude: Degree = Converter.degreeToDegreeComponents(calculateRequest.location.latitude);
     export let longitude: Degree = Converter.degreeToDegreeComponents(calculateRequest.location.longitude);
-
+    export let fovPos: FovViewPort = new  FovViewPort();
+    
     async function handleSubmitClick() {
+        console.log(calculateRequest.observationStartDate)
         calculateRequest.observationStart = await TimeZoneConverter.toUtc(calculateRequest.observationStartDate, calculateRequest.location)
-
         calculateRequest.location.longitude = Converter.degreeComponentsToDegree(longitude)
         calculateRequest.location.latitude = Converter.degreeComponentsToDegree(latitude)
 
         dispatch('submitted', calculateRequest);
     }
-
+    
+    async function handleUpdateFovRect(){
+        fovPos.fov.height = calculateRequest.fov.height;
+        fovPos.fov.width = calculateRequest.fov.width;
+        dispatch('updateFov',fovPos)
+    }
 </script>
 
 <div id="inputField">
@@ -65,7 +74,19 @@
                                      bind:value="{calculateRequest.fov.width}"/><span class="unit">°</span></div>
 
 
+    <label class="formLabel">FOV Azimut Position</label>
+    <div class="inputUnitDiv"><input min="0" max="180" class="input " id="fovAzimut" type="number"
+                                     bind:value="{fovPos.pos.azimuth}"/><span class="unit">°</span></div>
+
+
+    <label class="formLabel">FOV Höhe Position</label>
+    <div class="inputUnitDiv"><input min="0" max="90" class="input " id="fovWeight" type="number"
+                                     bind:value="{fovPos.pos.height}"/><span class="unit">°</span></div>
+
+
+
     <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
+    <Button on:click="{handleUpdateFovRect}">Aktualisiere Fov</Button>
 
 </div>
 
@@ -95,13 +116,6 @@
         --date-input-width: 100%;
     }
 
-
-    .symbol {
-        display: flex;
-        flex-wrap: nowrap;
-        padding-right: 10px;
-        width: 100%;
-    }
 
     .input {
         width: 50px;

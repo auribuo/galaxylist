@@ -1,5 +1,5 @@
 export class Fov {
-    width: number;
-    height: number;
-    positionAngle: number;
+    width: number=20;
+    height: number=20;
+    positionAngle: number=0;
 }

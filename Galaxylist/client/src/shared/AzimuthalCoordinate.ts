@@ -1,4 +1,4 @@
 export class AzimuthalCoordinate {
-    height: number;
-    azimuth: number;
+    height: number =20;
+    azimuth: number=250;
 }
