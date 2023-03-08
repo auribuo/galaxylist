@@ -4,13 +4,16 @@
     import * as  Plotly from 'plotly.js-basic-dist-min'
     import type {GalaxyResponse} from "../shared/GalaxyResponse";
     import axios from "axios";
-    import type {Data} from "plotly.js-basic-dist-min";
+    import type {Data, Layout} from "plotly.js-basic-dist-min";
 
     export let apiEndpoint: string = ""
 
     let loading: string = ""
 
     let galaxies: GalaxyResponse | null;
+    let trace: Data | null;
+    let layout: Partial<Layout> | null;
+
 
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
         const resp = await axios.post<GalaxyResponse>(apiEndpoint, calculateRequest)
@@ -20,19 +23,7 @@
     const displayGalaxies = async (event: CustomEvent<CalculateRequest>) => {
         galaxies = await getGalaxies(event.detail);
 
-        const traces: Data[] = galaxies.galaxies.map(galaxy => {
-            return {
-                x: [galaxy.azimuthalCoordinate.azimuth],
-                y: [galaxy.azimuthalCoordinate.height],
-                mode: 'markers',
-                type: 'scatter',
-                name: 'Galaxies',
-                text: [galaxy.toString()],
-                marker: {size: 10}
-            }
-        })
-
-        const trace: Data = {
+        trace = {
             x: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.azimuth),
             y: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.height),
             mode: 'markers',
@@ -41,22 +32,24 @@
             text: galaxies.galaxies.map(galaxy => galaxy.ugcNumber.toString()),
             marker: {size: 10}
         }
-
-        const layout = {
+        layout = {
             xaxis: {
                 range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
             },
             yaxis: {
                 range: [0, 90]
             },
-            title: 'Data Labels Hover'
+            title: 'Galaxien in Auswahl'
         };
+
+        const config = {responsive: true}
         loading = "Loading..."
-        await Plotly.newPlot('galaxyPlot', [trace], layout);
+        await Plotly.newPlot('galaxyPlot', [trace], layout, config);
         loading = ""
     }
-</script>
 
+
+</script>
 <div id="galaxyView">
     <InputFields
             on:submitted={displayGalaxies}
@@ -69,11 +62,18 @@
     #galaxyView {
         display: flex;
         flex-direction: row;
+
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
     }
 
     #galaxyPlot {
         height: 100%;
-        background-color: red;
+        width: 100%;
+        background-color: black;
     }
 
 
