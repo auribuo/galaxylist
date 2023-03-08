@@ -1,9 +1,9 @@
-namespace Galaxylist.Features.V1.Galaxies;
+namespace Galaxylist.Lib.Models;
 
 /// <summary>
-/// Request schema for the <see cref="GalaxyFilterEndpoint"/> endpoint. It supplies the necessary information to filter the galaxies.
+/// Class holding the neccessary data to calculate the ideal path of galaxies to take.
 /// </summary>
-public class GalaxyFilterRequest
+public class CalculationData
 {
 	/// <summary>
 	/// Observation start time. Will be automatically converted to UTC.

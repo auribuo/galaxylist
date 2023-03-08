@@ -7,10 +7,12 @@ namespace Galaxylist.Lib.Data;
 /// </summary>
 public class Galaxy : IPointData
 {
+	private bool _visited;
+
 	/// <summary>
-	/// The hubbles type of the galaxy. May not be present in the catalog and thus null.
+	/// The morphology of the galaxy.
 	/// </summary>
-	public required string HubbleType { get; set; }
+	public required string Morphology { get; set; }
 
 	/// <summary>
 	/// The UGC number of the galaxy.
@@ -63,6 +65,17 @@ public class Galaxy : IPointData
 	public double Distance => Redshift * 299792.458 / 70;
 
 	/// <summary>
+	/// Marks the galaxy as visited.
+	/// This makes the galaxies value to be 0.
+	/// </summary>
+	public void Visit() => _visited = true;
+
+	/// <summary>
+	/// Resets the visited state of the galaxy.
+	/// </summary>
+	public void Reset() => _visited = false;
+
+	/// <summary>
 	/// The overall quality of the galaxy. Calculated based only on the properties of the galaxy itself.
 	/// </summary>
 	/// TODO: Implement quality calculation
@@ -72,7 +85,7 @@ public class Galaxy : IPointData
 	{
 		double distance = Distance;
 		int inclination = Inclination;
-		double typeWeigth = 1 + HubbleType switch
+		double typeWeigth = 1 + Morphology switch
 		{
 			"E"   => 0.09984127,
 			"S0"  => 0.08793651,
@@ -94,9 +107,34 @@ public class Galaxy : IPointData
 		{
 			quality *= 1d / (100d / 1000d);
 		}
-		
+
 		// TODO perfection
-		return ((int)(quality * 100)) / 100d;
+		double resQuality = (int)(quality * 100) / 100d;
+
+		return resQuality * Convert.ToInt32(!_visited);
+	}
+
+	private double ExposureTime(double baseTime) => baseTime * Math.Pow(91 / Distance, 2);
+
+	private static double SlewFunction(double distance) => 1 / 3d * distance + 6;
+
+	private const int READOUT_TIME = 3;
+
+	/// <summary>
+	/// Calculates the exposure time for a given adjustment angle in degrees.
+	/// </summary>
+	/// <param name="adjustmentAngle">The angle of the slew movement</param>
+	/// <param name="baseTime">The base exposure time. Compared to UGC1</param>
+	/// <param name="cycles">The amount of exposure cycles to make</param>
+	/// <returns>The exposure times in seconds</returns>
+	public int CalculateExposure(double adjustmentAngle, double baseTime = 60, int cycles = 1)
+	{
+		double slewTime = SlewFunction(adjustmentAngle);
+		double waitTime = slewTime / 1.5;
+		double exposureTime = ExposureTime(baseTime);
+		double exposureTimeCheck = exposureTime / 2;
+
+		return cycles * (int)Math.Ceiling(slewTime + waitTime + exposureTime + READOUT_TIME + exposureTimeCheck + READOUT_TIME);
 	}
 
 	public Point Point

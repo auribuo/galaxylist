@@ -41,7 +41,7 @@ public partial class GalaxyDataRepo : IGalaxyDataRepo
 		new()
 		{
 			UgcNumber = response.UgcNumber,
-			HubbleType = NormalizeHubbleType(detail.HubbleType),
+			Morphology = NormalizeMorphology(detail.HubbleType),
 			EquatorialCoordinate = new EquatorialCoordinate
 			{
 				RightAscention = response.RightAscention!.Value,
