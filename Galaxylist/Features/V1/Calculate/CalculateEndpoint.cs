@@ -66,6 +66,8 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 								   .ToList();
 		}
 
+		
+
 		await SendAsync(new CalculateResponse
 			{
 				Total = galaxyList.Count,

@@ -44,4 +44,6 @@ public class CalculateRequest
 	///  The max semi minor axis of the galaxy in arcminutes
 	/// </summary>
 	public double MaxSemiMinorAxis { get; set; } = 10;
+
+	
 }

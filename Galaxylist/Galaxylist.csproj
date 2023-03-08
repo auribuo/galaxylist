@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Dbscan" Version="3.0.0" />
         <PackageReference Include="FastEndpoints" Version="5.8.0" />
         <PackageReference Include="FastEndpoints.Swagger" Version="5.8.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />

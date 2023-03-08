@@ -23,6 +23,8 @@
     export let longitude: Degree = Converter.degreeToDegreeComponents(calculateRequest.location.longitude);
     export let fovPos: FovViewPort = new  FovViewPort();
     
+    
+    
     async function handleSubmitClick() {
         calculateRequest.observationStartDate = new Date(dateStr)
         calculateRequest.observationStart = await TimeZoneConverter.toUtc(calculateRequest.observationStartDate, calculateRequest.location)
@@ -38,7 +40,8 @@
         fovPos.fov.width = calculateRequest.fov.width;
         dispatch('updateFov',fovPos)
     }
-
+    
+    
     let dateStr = calculateRequest.observationStartDate.toISOString().slice(0, 16);
 </script>
 
@@ -87,8 +90,12 @@
     <div class="inputUnitDiv"><input min="0" max="90" class="input " id="fovWeight" type="number"
                                      bind:value="{fovPos.pos.height}"/><span class="unit">°</span></div>
 
+    <label class="formLabel">Hole Viewports</label>
+    <div class="inputUnitDiv"><input min="0" max="90" class="input "  type="checkbox"
+                                     bind:checked="{calculateRequest.sendviewports}"/><span class="unit"></span></div>
 
-
+    
+    
     <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
     <Button on:click="{handleUpdateFovRect}">Aktualisiere Fov</Button>
 

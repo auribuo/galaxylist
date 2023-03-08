@@ -44,4 +44,8 @@ public class GalaxyFilterRequest
 	///  The max semi minor axis of the galaxy in arcminutes
 	/// </summary>
 	public double MaxSemiMinorAxis { get; set; } = 10;
+	
+	public bool SendViewports { get; set; } = false;
+
+	public double RasterApprox { get; set; } = 0.5;
 }

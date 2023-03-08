@@ -1,6 +1,7 @@
 import type {LocationCoordinates} from "./LocationCoordinates";
 import type {Telescope} from "./Telescope";
 import type {Fov} from "./Fov";
+import type {Viewport} from "./Viewport";
 
 
 export class CalculateRequest {
@@ -24,4 +25,6 @@ export class CalculateRequest {
     minimumMajorAxis: number = 10;
     minimumMinorAxis: number = 10;
     hemisphere: "W" | "E" = "W";
+    
+    sendviewports: boolean =false;
 }

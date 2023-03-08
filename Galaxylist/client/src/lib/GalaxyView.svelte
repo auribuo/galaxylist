@@ -7,6 +7,8 @@
     import type {Data, Layout} from "plotly.js-basic-dist-min";
     import {groupGalaxies} from "../shared/Plot";
     import {FovViewPort} from "../shared/FovViewPort";
+    import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
+    import {Fov} from "../shared/Fov";
 
     export let apiEndpoint: string = ""
 
@@ -15,6 +17,29 @@
     let galaxies: GalaxyResponse | null;
     let isFovShown: boolean = false;
   
+    
+    function createFovTrace(pos: AzimuthalCoordinate, fov: Fov): Data{
+        let ret: Data= {
+            x: [
+                pos.azimuth - fov.width/2,
+                pos.azimuth + fov.width/2,
+                pos.azimuth + fov.width/2,
+                pos.azimuth - fov.width/2,
+                pos.azimuth - fov.width/2,
+            ],
+            y: [
+                pos.height + fov.height/2,
+                pos.height + fov.height/2,
+                pos.height - fov.height/2,
+                pos.height - fov.height/2,
+                pos.height + fov.height/2,
+            ],
+            type: 'scatter',
+            showlegend: false
+        }
+        
+        return ret
+    }
 
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
         try {
@@ -22,7 +47,7 @@
             return resp.data as GalaxyResponse
         } catch (e) {
             window.alert("Fehler beim Laden der Galaxien: " + (e as AxiosError).message)
-            return {total: 0, galaxies: []}
+            return {total: 0, galaxies: [], viewports: []}
         }
     }
 
@@ -30,7 +55,14 @@
         galaxies = await getGalaxies(event.detail);
 
         const typeData = groupGalaxies(galaxies, "type")
+        
         const qualityData = groupGalaxies(galaxies, "quality")
+        
+        if(galaxies.viewports != null){
+            for(let viewport of galaxies.viewports){
+                typeData.push(createFovTrace(viewport.pos, event.detail.fov))
+            }    
+        }
         
         let layout: Partial<Layout>  = {
             xaxis: {
@@ -38,12 +70,13 @@
                 //range: [0, 360]
             },
             yaxis: {
+                scaleanchor: "x",
                 range: [0, 90]
             },
             title: 'Galaxien in Auswahl'
         };
 
-        const config = {responsive: true}
+        const config = {responsive: true, }
         loading = "Loading..."
         await Plotly.newPlot('typePlot', typeData, layout, config);
         await Plotly.newPlot('qualityPlot', qualityData, layout, config);
@@ -51,28 +84,11 @@
     }
     const  updateFov = async (event: CustomEvent<FovViewPort>) => {
         let coord = event.detail;
-        let trace: Data = {
-            x: [
-                coord.pos.azimuth - coord.fov.width/2,
-                coord.pos.azimuth + coord.fov.width/2,
-                coord.pos.azimuth + coord.fov.width/2,
-                coord.pos.azimuth - coord.fov.width/2,
-                coord.pos.azimuth - coord.fov.width/2,
-            ],
-            y: [
-                coord.pos.height + coord.fov.height/2,
-                coord.pos.height + coord.fov.height/2,
-                coord.pos.height - coord.fov.height/2,
-                coord.pos.height - coord.fov.height/2,
-                coord.pos.height + coord.fov.height/2,
-            ],
-            type: 'scatter',
-            name: 'FOV'
-        }
+        let trace: Data = createFovTrace(coord.pos, coord.fov)
         if(isFovShown){
-            await Plotly.deleteTraces('galaxyPlot',0)
+            await Plotly.deleteTraces('typePlot',0)
         }
-        await Plotly.addTraces('galaxyPlot',[trace],0)
+        await Plotly.addTraces('typePlot',[trace],0)
         isFovShown=true
     };
 </script>
@@ -94,27 +110,21 @@
     #galaxyView {
         display: flex;
         flex-direction: column;
-
         height: 100%;
         align-items: center;
         justify-content: center;
-
         width: 100%;
     }
 
     #plotContainer {
         display: flex;
         flex-direction: column;
-        width: 100%;
-        height: 100%;
+        width: 50%;
     }
-
     .galaxyPlot {
-        height: 100%;
+        aspect-ratio: 1/1;
         width: 100%;
         margin: 10px;
         background-color: black;
     }
-
-
 </style>

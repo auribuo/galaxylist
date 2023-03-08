@@ -67,11 +67,16 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 								   .ToList();
 		}
 
-		await SendAsync(new GalaxyResponse
-			{
-				Total = galaxyList.Count,
-				Galaxies = galaxyList,
-			}
+		GalaxyResponse ret = new GalaxyResponse()
+		{
+			Total = galaxyList.Count,
+			Galaxies = galaxyList,
+		};
+		if (req.SendViewports)
+		{
+			ret.Viewports = galaxyList.CalculateViewports(req.Fov,req.RasterApprox);
+		}
+		await SendAsync(ret
 		);
 	}
 }

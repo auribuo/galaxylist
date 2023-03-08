@@ -1,9 +1,11 @@
+using Dbscan;
+
 namespace Galaxylist.Lib.Data;
 
 /// <summary>
 /// Data model of a single galaxy.
 /// </summary>
-public class Galaxy
+public class Galaxy : IPointData
 {
 	/// <summary>
 	/// The hubbles type of the galaxy. May not be present in the catalog and thus null.
@@ -95,5 +97,13 @@ public class Galaxy
 		
 		// TODO perfection
 		return ((int)(quality * 100)) / 100d;
+	}
+
+	public Point Point
+	{
+		get
+		{
+			return new Point(AzimuthalCoordinate.Value.Azimuth, AzimuthalCoordinate.Value.Height);
+		}
 	}
 }

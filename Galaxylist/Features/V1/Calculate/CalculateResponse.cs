@@ -16,4 +16,6 @@ public class CalculateResponse
 	/// The list of galaxies calculated
 	/// </summary>
 	public required List<Galaxy> Galaxies { get; set; }
+	
+	
 }

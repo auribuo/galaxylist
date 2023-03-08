@@ -15,4 +15,7 @@ public class GalaxyResponse
 	/// Galaxies parsed from the catalog
 	/// </summary>
 	public required List<Galaxy> Galaxies { get; set; }
+	
+	
+	public List<Viewport> Viewports { get; set; }
 }

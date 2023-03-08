@@ -8,6 +8,7 @@ using FastEndpoints.Swagger;
 
 namespace Galaxylist;
 
+
 using System.Diagnostics;
 using Lib.Data.Repo;
 
@@ -59,6 +60,9 @@ public static class Program
 		logger.Log(LogLevel.Information, "Data repo initialized in {0}ms", stopwatch.ElapsedMilliseconds);
 
 		//CalculateNeighbours.viewports();
+		
+		
+		
 		app.Run();
 	}
 }

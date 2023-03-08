@@ -45,14 +45,10 @@ public static partial class Extensions
         }
     }
     
-    
-    
     public static List<Viewport> CalculateViewports(this List<Galaxy> galaxies, Fov fov, double rasterApprox)
     {
         Dictionary<Tuple<double, double>, Viewport> viewports = new Dictionary<Tuple<double, double>, Viewport>();
 
-        
-        
         double xStep = fov.Width * rasterApprox;
         double yStep = fov.Height * rasterApprox;
 
