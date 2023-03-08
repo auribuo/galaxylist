@@ -7,8 +7,8 @@ export class CalculateRequest {
     observationStart: string = ""
     observationStartDate: Date = new Date("2023-02-21T00:00:00Z");
     location: LocationCoordinates = {
-        latitude: -34,
-        longitude: 151
+        latitude: 47,
+        longitude: 12
     };
     telescope: Telescope = {
         focalLength: 0,

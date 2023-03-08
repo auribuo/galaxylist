@@ -1,5 +1,5 @@
 import type {LocationCoordinates} from "./LocationCoordinates";
-import axios from "axios/index";
+import axios from "axios";
 import type {TimeZoneInfo} from "./TimeZoneInfo";
 
 export class TimeZoneCache {
