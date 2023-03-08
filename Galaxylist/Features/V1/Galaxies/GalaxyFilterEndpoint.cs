@@ -1,11 +1,24 @@
 namespace Galaxylist.Features.V1.Galaxies;
 
+using Lib.Data.Repo;
+
 /// <summary>
 /// Endpoint that returns a list of all used galaxies.
 /// The galaxies are filtered through the absolute filters based on the request.
 /// </summary>
 public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse>
 {
+	private readonly IGalaxyDataRepo _repo;
+
+	/// <summary>
+	/// Injects the <see cref="IGalaxyDataRepo"/> service.
+	/// </summary>
+	/// <param name="repo">The injected service</param>
+	public GalaxyFilterEndpoint(IGalaxyDataRepo repo)
+	{
+		_repo = repo;
+	}
+
 	/// <summary>
 	/// <inheritdoc cref="BaseEndpoint.Configure"/>
 	/// </summary>
@@ -32,17 +45,18 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 		int limit = Query<int>("limit", false);
 		FilterPipeline<Galaxy> pipeline = FilterPipeline<Galaxy>.New()
 																.With(new PositionFilter(req.MinimumHeight))
-																.With(new MeridianFilter(req.Hemisphere));
+																.With(new MeridianFilter(req.Hemisphere))
+																.With(new SizeFilter(req.MaxSemiMajorAxis, req.MaxSemiMinorAxis));
 
-		IEnumerable<Galaxy> galaxies = UgcDataRepo.New()
-												  .Galaxies.Select(g =>
-													  {
-														  g.AzimuthalCoordinate =
-															  g.EquatorialCoordinate.ToAzimuthal(req.ObservationStart, req.Location);
+		IEnumerable<Galaxy> galaxies = _repo.Galaxies()
+											.Select(g =>
+												{
+													g.AzimuthalCoordinate =
+														g.EquatorialCoordinate.ToAzimuthal(req.ObservationStart, req.Location);
 
-														  return g;
-													  }
-												  );
+													return g;
+												}
+											);
 
 		List<Galaxy> galaxyList = pipeline.Filter(galaxies)
 										  .ToList();

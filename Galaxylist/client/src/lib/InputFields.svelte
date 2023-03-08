@@ -20,14 +20,16 @@
     export let longitude: Degree = Converter.degreeToDegreeComponents(calculateRequest.location.longitude);
 
     async function handleSubmitClick() {
+        calculateRequest.observationStartDate = new Date(dateStr)
         calculateRequest.observationStart = await TimeZoneConverter.toUtc(calculateRequest.observationStartDate, calculateRequest.location)
 
         calculateRequest.location.longitude = Converter.degreeComponentsToDegree(longitude)
         calculateRequest.location.latitude = Converter.degreeComponentsToDegree(latitude)
-
+        
         dispatch('submitted', calculateRequest);
     }
 
+    let dateStr = calculateRequest.observationStartDate.toISOString().slice(0, 16);
 </script>
 
 <div id="inputField">
@@ -43,8 +45,9 @@
 
     <label class="formLabel">Start der Observation</label>
     <div id="dateInput">
-        <DateInput bind:value={calculateRequest.observationStartDate}></DateInput>
+        <input type="datetime-local" bind:value={dateStr}>
     </div>
+
 
     <label class="formLabel">Hemisphäre</label>
     <select bind:value={calculateRequest.hemisphere}>

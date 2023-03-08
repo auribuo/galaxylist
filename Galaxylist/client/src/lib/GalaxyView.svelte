@@ -3,8 +3,9 @@
     import {CalculateRequest} from "../shared/CalculateRequest";
     import * as  Plotly from 'plotly.js-basic-dist-min'
     import type {GalaxyResponse} from "../shared/GalaxyResponse";
-    import axios from "axios";
+    import axios, {AxiosError} from "axios";
     import type {Data, Layout} from "plotly.js-basic-dist-min";
+    import {groupGalaxies} from "../shared/Plot";
 
     export let apiEndpoint: string = ""
 
@@ -16,25 +17,25 @@
 
 
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
-        const resp = await axios.post<GalaxyResponse>(apiEndpoint, calculateRequest)
-        return resp.data as GalaxyResponse
+        try {
+            const resp = await axios.post<GalaxyResponse>(apiEndpoint, calculateRequest)
+            return resp.data as GalaxyResponse
+        } catch (e) {
+            window.alert("Fehler beim Laden der Galaxien: " + (e as AxiosError).message)
+            return {total: 0, galaxies: []}
+        }
     }
 
     const displayGalaxies = async (event: CustomEvent<CalculateRequest>) => {
         galaxies = await getGalaxies(event.detail);
 
-        trace = {
-            x: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.azimuth),
-            y: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.height),
-            mode: 'markers',
-            type: 'scatter',
-            name: 'Galaxies',
-            text: galaxies.galaxies.map(galaxy => galaxy.ugcNumber.toString()),
-            marker: {size: 10}
-        }
+        const typeData = groupGalaxies(galaxies, "type")
+        const qualityData = groupGalaxies(galaxies, "quality")
+
         layout = {
             xaxis: {
                 range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
+                //range: [0, 360]
             },
             yaxis: {
                 range: [0, 90]
@@ -44,7 +45,8 @@
 
         const config = {responsive: true}
         loading = "Loading..."
-        await Plotly.newPlot('galaxyPlot', [trace], layout, config);
+        await Plotly.newPlot('typePlot', typeData, layout, config);
+        await Plotly.newPlot('qualityPlot', qualityData, layout, config);
         loading = ""
     }
 
@@ -55,13 +57,18 @@
             on:submitted={displayGalaxies}
     ></InputFields>
     <div>{loading}</div>
-    <div id="galaxyPlot"></div>
+    <br/>
+    <div id="plotContainer">
+        <div id="typePlot" class="galaxyPlot"></div>
+        <div id="qualityPlot" class="galaxyPlot"></div>
+    </div>
+
 </div>
 
 <style>
     #galaxyView {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
 
         height: 100%;
         align-items: center;
@@ -70,9 +77,17 @@
         width: 100%;
     }
 
-    #galaxyPlot {
+    #plotContainer {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+    }
+
+    .galaxyPlot {
         height: 100%;
         width: 100%;
+        margin: 10px;
         background-color: black;
     }
 

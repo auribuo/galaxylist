@@ -16,8 +16,8 @@ public static partial class Extensions
 	public static AzimuthalCoordinate ToAzimuthal(this EquatorialCoordinate coordinate, DateTime dateTime, Location location)
 	{
 		dateTime = dateTime.ToUniversalTime();
-		int longitude = location.Longitude;
-		int latitude = location.Latitude;
+		double longitude = location.Longitude;
+		double latitude = location.Latitude;
 		double rektaszension = coordinate.RightAscention.ToDegree();
 		double deklination = coordinate.Declination.ToDegrees();
 		double julianDate = ToJulianDate(dateTime);
@@ -47,7 +47,7 @@ public static partial class Extensions
 
 		// Kontrolliert ob sich Stundenwinkel und Azimut im selben Quadranten befinden.
 		// Ist dies der Fall, werden dem Azimut 180° addiert. (Arctan hat 2 Lösungen)
-		double azimutDeg = azimut * 180 / Math.PI;
+		double azimutDeg = RadToDeg(azimut);
 		azimutDeg = (azimutDeg + 360) % 360;
 
 		if (GetQudrant(azimutDeg) == GetQudrant(stundenWinkel))

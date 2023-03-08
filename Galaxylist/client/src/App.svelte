@@ -4,7 +4,7 @@
     import GalaxyView from "./lib/GalaxyView.svelte";
     import InputFields from "./lib/InputFields.svelte";
 
-    let apiEndpoint = "http://localhost:5244/api/calculate"
+    let apiEndpoint = "http://localhost:5244/api/galaxies"
 </script>
 
 <main>

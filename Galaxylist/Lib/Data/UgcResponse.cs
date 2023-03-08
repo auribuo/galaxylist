@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Data.Ugc;
+namespace Galaxylist.Lib.Data;
 
 /// <summary>
 /// Response model for the UGC catalog.

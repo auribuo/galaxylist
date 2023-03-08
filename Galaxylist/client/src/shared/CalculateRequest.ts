@@ -4,8 +4,8 @@ import type {Fov} from "./Fov";
 
 
 export class CalculateRequest {
-    observationStart: string = ""
-    observationStartDate: Date = new Date("2023-02-21T00:00:00Z");
+    observationStart: string = "2023-03-09T01:00:00Z"
+    observationStartDate: Date = new Date("2023-03-09T01:00:00Z");
     location: LocationCoordinates = {
         latitude: 47,
         longitude: 12
@@ -20,5 +20,8 @@ export class CalculateRequest {
         positionAngle: 0
     };
     minimumHeight: number = 30;
+
+    minimumMajorAxis: number = 10;
+    minimumMinorAxis: number = 10;
     hemisphere: "W" | "E" = "W";
 }

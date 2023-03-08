@@ -1,34 +1,9 @@
-namespace Galaxylist.Lib.Data.Ugc;
+namespace Galaxylist.Lib.Data.Repo;
 
-/// <summary>
-/// Data repository for the UGC catalog. Fetches the catalog from the CDS and parses it into a list of galaxies.
-/// </summary>
-public class UgcDataRepo
+public partial class GalaxyDataRepo
 {
-	/// <summary>
-	/// Constructor for the <see cref="UgcDataRepo"/>.
-	/// Fetches the catalog from VizieR and parses it into a list of galaxies on the first call to <see cref="New"/>.
-	/// The constructor is kept private to ensure that the catalog is only fetched once.
-	/// </summary>
-	private UgcDataRepo()
-	{
-		Task.WaitAll(FetchAsync());
-	}
-
-	/// <summary>
-	/// Returns an instance of the <see cref="UgcDataRepo"/>. On the first call, the catalog is fetched from VizieR and saved locally.
-	/// </summary>
-	/// <returns>A instance of <see cref="UgcDataRepo"/></returns>
-	public static UgcDataRepo New() => _instance ??= new UgcDataRepo();
-
-	// instance variable
-	private static UgcDataRepo? _instance;
-
-	// repository data
-	private List<UgcResponse> _ugcResponses = new();
-
 	// formData for the VizieR request
-	private readonly List<KeyValuePair<string, string>> _formFields = new()
+	private static readonly List<KeyValuePair<string, string>> FormFields = new()
 	{
 		("-ref", "VIZ64060aaa23fbb0").ToKvPair(),
 		("-to", "4").ToKvPair(),
@@ -71,54 +46,22 @@ public class UgcDataRepo
 	/// Sends a request to VizieR and saves the parsed response in <see cref="_ugcResponses"/>.
 	/// </summary>
 	/// <returns></returns>
-	private async Task<UgcDataRepo> FetchAsync()
+	private static async Task FetchAsync()
 	{
 		using HttpClient cli = new();
 
 		// https://vizier.unistra.fr/viz-bin/VizieR?-source=VII/26D&-to=3
 		HttpResponseMessage response =
-			await cli.PostAsync("https://vizier.unistra.fr/viz-bin/asu-txt", new FormUrlEncodedContent(_formFields));
+			await cli.PostAsync("https://vizier.unistra.fr/viz-bin/asu-txt", new FormUrlEncodedContent(FormFields));
 
 		string content = await response.Content.ReadAsStringAsync();
 		_ugcResponses = Parse(content)
 			.ToList();
 
-		return this;
+		_logger!.Log(LogLevel.Information, "UGC catalog fetched.");
+		await FetchDetailsAsync();
+		_logger!.Log(LogLevel.Information, "UGC catalog details fetched from NED.");
 	}
-
-	/// <summary>
-	/// Returns an <see cref="IEnumerable{T}"/> of <see cref="Galaxy"/>s which maps the UGC results to the <see cref="Galaxy"/> model.
-	/// </summary>
-	public IEnumerable<Galaxy> Galaxies => _ugcResponses.Select(MapGalaxy);
-
-	/// <summary>
-	/// Returns an <see cref="IEnumerable{T}"/> of <see cref="Galaxy"/>s which maps the UGC results to the <see cref="Galaxy"/> model.
-	/// Filters out galaxies without a Hubble type.
-	/// </summary>
-	public IEnumerable<Galaxy> HubbleTypedGalaxies =>
-		_ugcResponses.Where(response => !string.IsNullOrWhiteSpace(response.HubbleType))
-					 .Select(MapGalaxy);
-
-	/// <summary>
-	/// Maps a <see cref="UgcResponse"/> to a <see cref="Galaxy"/>.
-	/// </summary>
-	/// <param name="response">The ugc response to map</param>
-	/// <returns>A new <see cref="Galaxy"/> with all given values set</returns>
-	private static Galaxy MapGalaxy(UgcResponse response) =>
-		new()
-		{
-			UgcNumber = response.UgcNumber,
-			HubbleType = response.HubbleType,
-			EquatorialCoordinate = new EquatorialCoordinate
-			{
-				RightAscention = response.RightAscention!.Value,
-				Declination = response.Declination!.Value
-			},
-			Magnitude = response.Magnitude,
-			PositionAngle = response.PositionAngle,
-			SemiMajorAxis = response.MajorAxis,
-			SemiMinorAxis = response.MinorAxis,
-		};
 
 	/// <summary>
 	/// Parses the VizieR response into a list of <see cref="UgcResponse"/>s.

@@ -1,10 +1,23 @@
 namespace Galaxylist.Features.V1.Calculate;
 
+using Lib.Data.Repo;
+
 /// <summary>
 /// Endpoint that calculates the ideal path of galaxies to take based on <see cref="CalculateRequest"/>
 /// </summary>
 public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 {
+	private readonly IGalaxyDataRepo _repo;
+
+	/// <summary>
+	/// Injects the <see cref="IGalaxyDataRepo"/> service.
+	/// </summary>
+	/// <param name="repo">The injected service</param>
+	public CalculateEndpoint(IGalaxyDataRepo repo)
+	{
+		_repo = repo;
+	}
+
 	/// <summary>
 	/// <inheritdoc cref="BaseEndpoint.Configure"/>
 	/// </summary>
@@ -31,17 +44,18 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 		int limit = Query<int>("limit", false);
 		FilterPipeline<Galaxy> pipeline = FilterPipeline<Galaxy>.New()
 																.With(new PositionFilter(req.MinimumHeight))
-																.With(new MeridianFilter(req.Hemisphere));
+																.With(new MeridianFilter(req.Hemisphere))
+																.With(new SizeFilter());
 
-		IEnumerable<Galaxy> galaxies = UgcDataRepo.New()
-												  .Galaxies.Select(g =>
-													  {
-														  g.AzimuthalCoordinate =
-															  g.EquatorialCoordinate.ToAzimuthal(req.ObservationStart, req.Location);
+		IEnumerable<Galaxy> galaxies = _repo.Galaxies()
+											.Select(g =>
+												{
+													g.AzimuthalCoordinate =
+														g.EquatorialCoordinate.ToAzimuthal(req.ObservationStart, req.Location);
 
-														  return g;
-													  }
-												  );
+													return g;
+												}
+											);
 
 		List<Galaxy> galaxyList = pipeline.Filter(galaxies)
 										  .ToList();

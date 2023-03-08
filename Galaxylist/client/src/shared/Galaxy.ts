@@ -15,4 +15,7 @@ export class Galaxy {
     positionAngle: number;
     rightAscension: RightAscension;
     declination: Declination;
+    inclination: number;
+    distance: number;
+    quality: number;
 }

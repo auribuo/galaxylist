@@ -1,11 +1,24 @@
 namespace Galaxylist.Features.V1.Galaxies;
 
+using Lib.Data.Repo;
+
 /// <summary>
 /// Endpoint that returns a list of all used galaxies.
 /// Conforms to the UGC catalog.
 /// </summary>
 public class GalaxyEndpoint : Endpoint<EmptyRequest, GalaxyResponse>
 {
+	private readonly IGalaxyDataRepo _repo;
+
+	/// <summary>
+	/// Injects the <see cref="IGalaxyDataRepo"/> service.
+	/// </summary>
+	/// <param name="repo">The injected service</param>
+	public GalaxyEndpoint(IGalaxyDataRepo repo)
+	{
+		_repo = repo;
+	}
+	
 	/// <summary>
 	/// <inheritdoc cref="BaseEndpoint.Configure"/>
 	/// </summary>
@@ -29,8 +42,7 @@ public class GalaxyEndpoint : Endpoint<EmptyRequest, GalaxyResponse>
 	public override async Task HandleAsync(EmptyRequest req, CancellationToken ct)
 	{
 		int limit = Query<int>("limit", false);
-		UgcDataRepo repo = UgcDataRepo.New();
-		List<Galaxy> galaxies = repo.Galaxies.ToList();
+		List<Galaxy> galaxies = _repo.Galaxies().ToList();
 
 		if (limit != 0)
 		{

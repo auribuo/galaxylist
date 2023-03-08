@@ -11,8 +11,8 @@ public class PositionFilter : IFilter<Galaxy>
 	/// Creates a new instance of the filter which filters the galaxies based on their azimuthal height.
 	/// It excludes all galaxies with an azimuthal height lower than the given minimum height.
 	/// </summary>
-	/// <param name="minHeight"></param>
-	public PositionFilter(int minHeight)
+	/// <param name="minHeight">The optional minimum height of the galaxy</param>
+	public PositionFilter(int minHeight = 30)
 	{
 		_minHeight = minHeight;
 	}

@@ -1,13 +1,14 @@
 global using FastEndpoints;
 global using Galaxylist.Lib.Data;
-global using Galaxylist.Lib.Data.Ugc;
 global using Galaxylist.Lib.Models;
-global using Galaxylist.Lib.Filter;
 global using Galaxylist.Lib.Filter.Absolute;
 global using Galaxylist.Lib.Extensions;
 using FastEndpoints.Swagger;
 
 namespace Galaxylist;
+
+using System.Diagnostics;
+using Lib.Data.Repo;
 
 /// <summary>
 /// Entry point of the application
@@ -21,6 +22,7 @@ public static class Program
 	public static void Main(string[] args)
 	{
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+		builder.Services.AddSingleton<IGalaxyDataRepo, GalaxyDataRepo>();
 		builder.Services.AddFastEndpoints(); // auto-discover endpoints
 		builder.Services.AddCors();
 		builder.Services.AddSwaggerDoc(swaggerSettings =>
@@ -47,6 +49,13 @@ public static class Program
 		);
 
 		app.UseSwaggerGen();
+		ILogger<GalaxyDataRepo>? logger = app.Services.GetRequiredService<ILogger<GalaxyDataRepo>>();
+		logger.Log(LogLevel.Information, "Initializing data repo...");
+		Stopwatch? stopwatch = new Stopwatch();
+		stopwatch.Start();
+		GalaxyDataRepo.Init(logger);
+		stopwatch.Stop();
+		logger.Log(LogLevel.Information, "Data repo initialized in {0}ms", stopwatch.ElapsedMilliseconds);
 		app.Run();
 	}
 }
