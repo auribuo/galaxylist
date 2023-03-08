@@ -6,15 +6,16 @@
     import axios, {AxiosError} from "axios";
     import type {Data, Layout} from "plotly.js-basic-dist-min";
     import {groupGalaxies} from "../shared/Plot";
+    import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
+    import {FovViewPort} from "../shared/FovViewPort";
 
     export let apiEndpoint: string = ""
 
     let loading: string = ""
 
     let galaxies: GalaxyResponse | null;
-    let trace: Data | null;
-    let layout: Partial<Layout> | null;
-
+    let isFovShown: boolean = false;
+  
 
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
         try {
@@ -33,6 +34,16 @@
         const qualityData = groupGalaxies(galaxies, "quality")
 
         layout = {
+        let trace: Data = {
+            x: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.azimuth),
+            y: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.height),
+            mode: 'markers',
+            type: 'scatter',
+            name: 'Galaxies',
+            text: galaxies.galaxies.map(galaxy => galaxy.ugcNumber.toString()),
+            marker: {size: 10}
+        }
+        let layout: Partial<Layout>  = {
             xaxis: {
                 range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
                 //range: [0, 360]
@@ -49,12 +60,37 @@
         await Plotly.newPlot('qualityPlot', qualityData, layout, config);
         loading = ""
     }
-
-
+    const  updateFov = async (event: CustomEvent<FovViewPort>) => {
+        let coord = event.detail;
+        let trace: Data = {
+            x: [
+                coord.pos.azimuth - coord.fov.width/2,
+                coord.pos.azimuth + coord.fov.width/2,
+                coord.pos.azimuth + coord.fov.width/2,
+                coord.pos.azimuth - coord.fov.width/2,
+                coord.pos.azimuth - coord.fov.width/2,
+            ],
+            y: [
+                coord.pos.height + coord.fov.height/2,
+                coord.pos.height + coord.fov.height/2,
+                coord.pos.height - coord.fov.height/2,
+                coord.pos.height - coord.fov.height/2,
+                coord.pos.height + coord.fov.height/2,
+            ],
+            type: 'scatter',
+            name: 'FOV'
+        }
+        if(isFovShown){
+            await Plotly.deleteTraces('galaxyPlot',0)
+        }
+        await Plotly.addTraces('galaxyPlot',[trace],0)
+        isFovShown=true
+    };
 </script>
 <div id="galaxyView">
     <InputFields
             on:submitted={displayGalaxies}
+            on:updateFov={updateFov}
     ></InputFields>
     <div>{loading}</div>
     <br/>

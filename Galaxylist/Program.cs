@@ -4,6 +4,8 @@ global using Galaxylist.Lib.Models;
 global using Galaxylist.Lib.Filter.Absolute;
 global using Galaxylist.Lib.Extensions;
 using FastEndpoints.Swagger;
+using Galaxylist.Features.V1.Galaxies;
+using Galaxylist.Lib.Workbook;
 
 namespace Galaxylist;
 
@@ -56,6 +58,8 @@ public static class Program
 		GalaxyDataRepo.Init(logger);
 		stopwatch.Stop();
 		logger.Log(LogLevel.Information, "Data repo initialized in {0}ms", stopwatch.ElapsedMilliseconds);
+
+		//CalculateNeighbours.viewports();
 		app.Run();
 	}
 }
