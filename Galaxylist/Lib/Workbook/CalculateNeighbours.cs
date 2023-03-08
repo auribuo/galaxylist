@@ -2,13 +2,20 @@ namespace Galaxylist.Lib.Workbook;
 
 public static  class CalculateNeighbours
 {
+    public static void viewports()
+    {
+        UgcDataRepo repo = UgcDataRepo.New();
+        List<Galaxy> galaxies = repo.Galaxies.ToList();
+
+        galaxies.CalculateViewports(new Fov(){Width=0.5, Height = 0.8}, 0.25);
+    }
     public static void calc()
     {
         
         UgcDataRepo repo = UgcDataRepo.New();
         List<Galaxy> galaxies = repo.Galaxies.ToList();
 
-
+        galaxies.CalculateViewports(new Fov(){Width=0.5, Height = 0.8}, 1/4);
         Dictionary<Galaxy, List<Galaxy>> neighbours = new Dictionary<Galaxy, List<Galaxy>>();
 
         double maxDist = 0.3;

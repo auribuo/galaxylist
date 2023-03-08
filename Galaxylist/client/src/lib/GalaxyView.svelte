@@ -74,8 +74,6 @@
         await Plotly.addTraces('galaxyPlot',[trace],0)
         isFovShown=true
     };
-
-
 </script>
 <div id="galaxyView">
     <InputFields
