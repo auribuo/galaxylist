@@ -1,8 +1,5 @@
 namespace Galaxylist.Features.V1.Galaxies;
 
-using Lib.Data;
-using Lib.Data.Ugc;
-
 /// <summary>
 /// Endpoint that returns a list of all used galaxies.
 /// Conforms to the UGC catalog.

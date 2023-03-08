@@ -1,20 +1,21 @@
-namespace Galaxylist.Features.V1.Calculate;
+namespace Galaxylist.Features.V1.Galaxies;
 
 /// <summary>
-/// Endpoint that calculates the ideal path of galaxies to take based on <see cref="CalculateRequest"/>
+/// Endpoint that returns a list of all used galaxies.
+/// The galaxies are filtered through the absolute filters based on the request.
 /// </summary>
-public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
+public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse>
 {
 	/// <summary>
 	/// <inheritdoc cref="BaseEndpoint.Configure"/>
 	/// </summary>
 	public override void Configure()
 	{
-		Post("/calculate");
+		Post("/galaxies");
 		Description(endpoint =>
 			{
-				endpoint.Accepts<CalculateRequest>("application/json")
-						.Produces<CalculateResponse>(200, "application/json");
+				endpoint.Accepts<GalaxyFilterRequest>("application/json")
+						.Produces<GalaxyResponse>(200, "application/json");
 			}
 		);
 
@@ -26,7 +27,7 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 	/// </summary>
 	/// <param name="req">Request dto</param>
 	/// <param name="ct">Cancellation token</param>
-	public override async Task HandleAsync(CalculateRequest req, CancellationToken ct)
+	public override async Task HandleAsync(GalaxyFilterRequest req, CancellationToken ct)
 	{
 		int limit = Query<int>("limit", false);
 		FilterPipeline<Galaxy> pipeline = FilterPipeline<Galaxy>.New()
@@ -52,7 +53,7 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 								   .ToList();
 		}
 
-		await SendAsync(new CalculateResponse
+		await SendAsync(new GalaxyResponse
 			{
 				Total = galaxyList.Count,
 				Galaxies = galaxyList,

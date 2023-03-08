@@ -5,9 +5,9 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["Galaxylist/Galaxylist.csproj", "Galaxylist/"]
+COPY ["Galaxylist.csproj", "Galaxylist/"]
 RUN dotnet restore "Galaxylist/Galaxylist.csproj"
-COPY . .
+COPY . Galaxylist/
 WORKDIR "/src/Galaxylist"
 RUN dotnet build "Galaxylist.csproj" -c Release -o /app/build
 

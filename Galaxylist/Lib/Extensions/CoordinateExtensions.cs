@@ -1,19 +1,19 @@
-namespace Galaxylist.Lib.Coordinates;
+namespace Galaxylist.Lib.Extensions;
 
 // https://de.wikipedia.org/wiki/Sternzeit#Sternzeit_in_Greenwich
 /// <summary>
-/// Class that contains methods to convert equatorial coordinates to azimuthal coordinates.
+/// Class holding all extension methods
 /// </summary>
-public static class CoordinateConverter
+public static partial class Extensions
 {
 	/// <summary>
 	/// Converts a <see cref="EquatorialCoordinate"/> to a <see cref="AzimuthalCoordinate"/> dependent of the location and time.
 	/// </summary>
+	/// <param name="coordinate">The equatorial coordinate to convert</param>
 	/// <param name="dateTime">Time of the calculation. Will be converted to UTC automatically</param>
 	/// <param name="location">Location of the calculation</param>
-	/// <param name="coordinate">The equatorial coordinate to convert</param>
 	/// <returns>The equivalent azimuthal coordinate based on the given location and time</returns>
-	public static AzimuthalCoordinate ConvEqToZen(DateTime dateTime, Location location, EquatorialCoordinate coordinate)
+	public static AzimuthalCoordinate ToAzimuthal(this EquatorialCoordinate coordinate, DateTime dateTime, Location location)
 	{
 		dateTime = dateTime.ToUniversalTime();
 		int longitude = location.Longitude;

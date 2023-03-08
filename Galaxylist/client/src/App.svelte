@@ -8,8 +8,5 @@
 </script>
 
 <main>
-
-
     <GalaxyView bind:apiEndpoint={apiEndpoint}></GalaxyView>
-
 </main>
