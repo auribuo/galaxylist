@@ -6,7 +6,6 @@
     import axios, {AxiosError} from "axios";
     import type {Data, Layout} from "plotly.js-basic-dist-min";
     import {groupGalaxies} from "../shared/Plot";
-    import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
     import {FovViewPort} from "../shared/FovViewPort";
 
     export let apiEndpoint: string = ""
@@ -32,17 +31,7 @@
 
         const typeData = groupGalaxies(galaxies, "type")
         const qualityData = groupGalaxies(galaxies, "quality")
-
-        layout = {
-        let trace: Data = {
-            x: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.azimuth),
-            y: galaxies.galaxies.map(galaxy => galaxy.azimuthalCoordinate.height),
-            mode: 'markers',
-            type: 'scatter',
-            name: 'Galaxies',
-            text: galaxies.galaxies.map(galaxy => galaxy.ugcNumber.toString()),
-            marker: {size: 10}
-        }
+        
         let layout: Partial<Layout>  = {
             xaxis: {
                 range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]

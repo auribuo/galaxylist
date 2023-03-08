@@ -64,18 +64,9 @@ public static partial class Extensions
 
         Console.WriteLine(xStep);
         Console.WriteLine(yStep);
-        
-        IEnumerable<Galaxy> galaxiesAzimut = UgcDataRepo.New()
-            .Galaxies.Select(g =>
-                {
-                    g.AzimuthalCoordinate =
-                        g.EquatorialCoordinate.ToAzimuthal(new DateTime(), new Location(){Latitude = 47, Longitude = 12});
-                    return g;
-                }
-            );
-        
+
         int n = 1;
-        foreach(Galaxy galaxy in galaxiesAzimut)
+        foreach(Galaxy galaxy in galaxies)
         {
             n += 1;
             
@@ -124,7 +115,7 @@ public static partial class Extensions
         }
         
         
-        foreach(Galaxy galaxy in galaxiesAzimut)
+        foreach(Galaxy galaxy in galaxies)
         {
             Console.WriteLine(n);
             double xApprox = getNearestDeg(galaxy.AzimuthalCoordinate.Value.Azimuth, xStep);

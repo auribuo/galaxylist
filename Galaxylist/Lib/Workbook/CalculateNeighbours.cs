@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Workbook;
+/*namespace Galaxylist.Lib.Workbook;
 
 public static  class CalculateNeighbours
 {
@@ -56,4 +56,4 @@ public static  class CalculateNeighbours
 		
         Console.WriteLine(neighbours.Values.Count(galaxy => galaxy.Count ==4));
     }
-}
+}*/
