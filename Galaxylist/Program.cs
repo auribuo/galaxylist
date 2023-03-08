@@ -4,6 +4,7 @@ global using Galaxylist.Lib.Models;
 global using Galaxylist.Lib.Filter.Absolute;
 global using Galaxylist.Lib.Extensions;
 using FastEndpoints.Swagger;
+
 //using Galaxylist.Lib.Workbook;
 
 namespace Galaxylist;
@@ -52,7 +53,7 @@ public static class Program
 		app.UseSwaggerGen();
 		ILogger<GalaxyDataRepo>? logger = app.Services.GetRequiredService<ILogger<GalaxyDataRepo>>();
 		logger.Log(LogLevel.Information, "Initializing data repo...");
-		Stopwatch? stopwatch = new Stopwatch();
+		Stopwatch stopwatch = new();
 		stopwatch.Start();
 		GalaxyDataRepo.Init(logger);
 		stopwatch.Stop();

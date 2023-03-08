@@ -2,7 +2,7 @@ namespace Galaxylist.Lib.Data.Repo;
 
 public partial class GalaxyDataRepo
 {
-	private static string NormalizeHubbleType(string? type)
+	private static string NormalizeMorphology(string? type)
 	{
 		if (type is null || string.IsNullOrWhiteSpace(type))
 		{
