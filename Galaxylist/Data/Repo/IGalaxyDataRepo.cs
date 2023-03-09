@@ -1,4 +1,6 @@
-namespace Galaxylist.Lib.Data.Repo;
+namespace Galaxylist.Data.Repo;
+
+using Models;
 
 /// <summary>
 /// Interface for a repository of galaxies.

@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Models;
+namespace Galaxylist.Models;
 
 /// <summary>
 /// Class holding the neccessary data to calculate the ideal path of galaxies to take.

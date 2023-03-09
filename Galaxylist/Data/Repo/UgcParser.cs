@@ -1,4 +1,7 @@
-namespace Galaxylist.Lib.Data.Repo;
+namespace Galaxylist.Data.Repo;
+
+using Extensions;
+using Models;
 
 public partial class GalaxyDataRepo
 {

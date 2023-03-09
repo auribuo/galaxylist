@@ -1,7 +1,6 @@
-namespace Galaxylist.Api.Features.V1.Galaxies;
+namespace Galaxylist.Api.Features.Galaxies;
 
-using Lib.Data;
-using Lib.Models;
+using Models;
 
 /// <summary>
 /// Class that represents the response of the <see cref="GalaxyEndpoint"/> endpoint. It contains the total number of galaxies and the list of galaxies parsed from the catalog.

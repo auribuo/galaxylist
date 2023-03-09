@@ -1,4 +1,4 @@
-namespace Galaxylist.Api.Features.V1.Health;
+namespace Galaxylist.Api.Features.Health;
 
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;

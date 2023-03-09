@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Models;
+namespace Galaxylist.Models;
 
 /// <summary>
 /// Represents the declination of an object in the sky in degrees, minutes and seconds.

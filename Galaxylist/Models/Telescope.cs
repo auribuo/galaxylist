@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Models;
+namespace Galaxylist.Models;
 
 /// <summary>
 /// Represents data about a telescope

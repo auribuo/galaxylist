@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <OutputType>library</OutputType>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
@@ -14,17 +14,10 @@
         <PackageReference Include="FastEndpoints.Swagger" Version="5.8.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
         <PackageReference Include="Pathoschild.Http.FluentClient" Version="4.2.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="..\.dockerignore">
-            <Link>.dockerignore</Link>
-        </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Lib\Filter\Weighted" />
+      <None Remove="Properties\launchSettings.json" />
     </ItemGroup>
 
 </Project>

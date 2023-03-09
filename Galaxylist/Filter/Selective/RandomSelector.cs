@@ -1,4 +1,6 @@
-namespace Galaxylist.Lib.Filter.Selective;
+namespace Galaxylist.Filter.Selective;
+
+using Models;
 
 /// <summary>
 /// A selector that selects a random number of items from a list of <see cref="Viewport"/>

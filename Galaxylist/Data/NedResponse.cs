@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Data;
+namespace Galaxylist.Data;
 
 public class NedResponse
 {

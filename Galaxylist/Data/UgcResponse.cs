@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Data;
+namespace Galaxylist.Data;
 
 using Models;
 

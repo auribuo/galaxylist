@@ -1,8 +1,8 @@
-namespace Galaxylist.Api.Features.V1.Galaxies;
+namespace Galaxylist.Api.Features.Galaxies;
 
+using Data.Repo;
 using FastEndpoints;
-using Galaxylist.Lib.Data.Repo;
-using Lib.Data;
+using Models;
 
 /// <summary>
 /// Endpoint that returns a list of all used galaxies.

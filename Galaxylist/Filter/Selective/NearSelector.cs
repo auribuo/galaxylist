@@ -1,6 +1,8 @@
-namespace Galaxylist.Lib.Filter.Selective;
+namespace Galaxylist.Filter.Selective;
 
 using Data.Repo;
+using Extensions;
+using Models;
 
 /// <summary>
 /// Selector which only prioritizes the nearest viewports.
@@ -82,10 +84,7 @@ public class NearSelector
 												   }
 											   );
 
-		FilterPipeline<Galaxy> filter =
-			FilterRepo.Default(_data.Hemisphere, _data.MinimumHeight, _data.MaxSemiMajorAxis, _data.MaxSemiMinorAxis);
-
-		newGalaxies = filter.Filter(newGalaxies);
+		newGalaxies = SituationalFilter.Filter(newGalaxies, _data.Hemisphere, _data.MinimumHeight, _data.MaxSemiMajorAxis, _data.MaxSemiMinorAxis);
 		List<Viewport> newViewports = newGalaxies.ToList()
 												 .CalculateViewports(_data.Fov);
 

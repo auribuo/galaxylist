@@ -1,6 +1,7 @@
 <script lang="ts">
     import {Galaxy} from "../shared/Galaxy.js";
-    import {createEventDispatcher} from "svelte";
+    import {createEventDispatcher, onMount} from "svelte";
+    import * as Plotly from "plotly.js-basic-dist-min"
 
     export let galaxy: Galaxy;
     export let type: "type" | "quality"
@@ -10,12 +11,20 @@
     function handleClosePanel() {
         dispatch("closePanel", type)
     }
+    
+    Plotly.redraw("plot")
 </script>
-
-<table>
+<h2>
+    Details fuer UGC{galaxy.ugcNumber} ({galaxy.preferredName})
+</h2>
+<table style="width: 100%">
     <tr>
-        <td>UGC</td>
+        <td>UGC Number</td>
         <td>{galaxy.ugcNumber}</td>
+    </tr>
+    <tr>
+        <td>Preferred Name</td>
+        <td>{galaxy.preferredName}</td>
     </tr>
     <tr>
         <td>Distance</td>

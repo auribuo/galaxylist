@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Models;
+namespace Galaxylist.Models;
 
 /// <summary>
 /// Represents the right ascention of an object in the sky in hours, minutes and seconds.

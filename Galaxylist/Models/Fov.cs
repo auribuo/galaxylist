@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Models;
+namespace Galaxylist.Models;
 
 /// <summary>
 /// Represents a camera's field of view

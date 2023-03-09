@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Extensions;
+namespace Galaxylist.Extensions;
 
 /// <summary>
 /// Class holding all extension methods

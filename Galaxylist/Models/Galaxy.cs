@@ -1,12 +1,16 @@
-using Dbscan;
+namespace Galaxylist.Models;
 
-namespace Galaxylist.Lib.Data;
+using Dbscan;
 
 /// <summary>
 /// Data model of a single galaxy.
 /// </summary>
-public class Galaxy : IPointData
+public class Galaxy : JsonStringer, IPointData
 {
+	private const int MAG_UGC2 = 17;
+	private const int DST_UGC2 = 268;
+	private const int BASE_TIME_UGC2 = 536;
+
 	private bool _visited;
 
 	/// <summary>
@@ -88,8 +92,6 @@ public class Galaxy : IPointData
 
 	private double CalculateQuality()
 	{
-		double distance = Distance;
-		int inclination = Inclination;
 		double typeWeigth = 1 + Morphology switch
 		{
 			"E"   => 0.09984127,
@@ -102,24 +104,12 @@ public class Galaxy : IPointData
 			var _ => 0.149887, // Average of all other types
 		};
 
-		double quality = typeWeigth;
+		double quality = typeWeigth * Math.Pow(10, (Magnitude - MAG_UGC2) / -2.5);
 
-		if (distance > 0)
-		{
-			quality *= 1 / (distance / 1000);
-		}
-		else
-		{
-			quality *= 1d / (100d / 1000d);
-		}
-
-		// TODO perfection
-		double resQuality = (int)(quality * 100) / 100d;
-
-		return resQuality * Convert.ToInt32(!_visited);
+		return quality * Convert.ToInt32(!_visited);
 	}
 
-	private double ExposureTime(double baseTime) => baseTime * Math.Pow(91 / Distance, 2);
+	private double ExposureTime(double baseTime) => baseTime * Math.Pow(DST_UGC2 / Distance, 2);
 
 	private static double SlewFunction(double distance) => 1 / 2d * distance + 6;
 
@@ -132,7 +122,7 @@ public class Galaxy : IPointData
 	/// <param name="baseTime">The base exposure time. Compared to UGC1</param>
 	/// <param name="cycleCount">The amount of exposure cycles to make</param>
 	/// <returns>The exposure times in seconds</returns>
-	public int CalculateExposure(double adjustmentAngle, double baseTime = 60, int cycleCount = 1)
+	public int CalculateExposure(double adjustmentAngle, double baseTime = BASE_TIME_UGC2, int cycleCount = 1)
 	{
 		double slewTime = SlewFunction(adjustmentAngle);
 		double waitTime = slewTime / 1.5;

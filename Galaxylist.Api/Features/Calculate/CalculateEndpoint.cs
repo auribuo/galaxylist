@@ -1,10 +1,10 @@
-namespace Galaxylist.Api.Features.V1.Calculate;
+namespace Galaxylist.Api.Features.Calculate;
 
+using Data.Repo;
+using Extensions;
 using FastEndpoints;
-using Galaxylist.Lib.Data.Repo;
-using Lib.Data;
-using Lib.Extensions;
-using Lib.Filter.Absolute;
+using Filter;
+using Models;
 
 /// <summary>
 /// Endpoint that calculates the ideal path of galaxies to take based on <see cref="CalculateRequest"/>
@@ -35,10 +35,6 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 	public override async Task HandleAsync(CalculateRequest req, CancellationToken ct)
 	{
 		int limit = Query<int>("limit", false);
-		FilterPipeline<Galaxy> pipeline = FilterPipeline<Galaxy>.New()
-																.With(new PositionFilter(req.MinimumHeight))
-																.With(new MeridianFilter(req.Hemisphere))
-																.With(new SizeFilter());
 
 		IEnumerable<Galaxy> galaxies = GalaxyDataRepo.Galaxies()
 													 .Select(g =>
@@ -50,8 +46,9 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 														 }
 													 );
 
-		List<Galaxy> galaxyList = pipeline.Filter(galaxies)
-										  .ToList();
+		List<Galaxy> galaxyList = SituationalFilter
+								  .Filter(galaxies, req.Hemisphere, req.MinimumHeight, req.MaxSemiMajorAxis, req.MaxSemiMinorAxis)
+								  .ToList();
 
 		if (limit != 0)
 		{

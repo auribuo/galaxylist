@@ -1,4 +1,4 @@
-namespace Galaxylist.Lib.Data.Repo;
+namespace Galaxylist.Data.Repo;
 
 public partial class GalaxyDataRepo
 {

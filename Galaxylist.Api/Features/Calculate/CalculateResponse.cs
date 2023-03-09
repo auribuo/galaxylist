@@ -1,6 +1,6 @@
-namespace Galaxylist.Api.Features.V1.Calculate;
+namespace Galaxylist.Api.Features.Calculate;
 
-using Galaxylist.Lib.Data;
+using Models;
 
 /// <summary>
 /// Class that represents the response of the <see cref="CalculateEndpoint"/> endpoint. It contains the total number of galaxies and the list of galaxies calculated.

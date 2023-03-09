@@ -14,126 +14,191 @@
     import {FovViewPort} from "../shared/FovViewPort";
 
     const dispatch = createEventDispatcher<{
-        submitted: CalculateRequest,
+        submitted: { data: CalculateRequest, type: string },
         updateFov: FovViewPort
     }>();
     export let calculateRequest: CalculateRequest = new CalculateRequest()
-
+    let type: "type" | "quality" = "type";
     export let latitude: Degree = Converter.degreeToDegreeComponents(calculateRequest.location.latitude);
     export let longitude: Degree = Converter.degreeToDegreeComponents(calculateRequest.location.longitude);
-    export let fovPos: FovViewPort = new  FovViewPort();
-    
-    
-    
+    export let fovPos: FovViewPort = new FovViewPort();
+
+
     async function handleSubmitClick() {
         calculateRequest.observationStartDate = new Date(dateStr)
         calculateRequest.observationStart = await TimeZoneConverter.toUtc(calculateRequest.observationStartDate, calculateRequest.location)
 
         calculateRequest.location.longitude = Converter.degreeComponentsToDegree(longitude)
         calculateRequest.location.latitude = Converter.degreeComponentsToDegree(latitude)
-        
-        dispatch('submitted', calculateRequest);
+
+        dispatch('submitted', {data: calculateRequest, type});
     }
-    
-    async function handleUpdateFovRect(){
+
+    async function handleUpdateFovRect() {
         fovPos.fov.height = calculateRequest.fov.height;
         fovPos.fov.width = calculateRequest.fov.width;
-        dispatch('updateFov',fovPos)
+        dispatch('updateFov', fovPos)
     }
-    
-    
+
+
     let dateStr = calculateRequest.observationStartDate.toISOString().slice(0, 16);
 </script>
 
 <div id="inputField">
-    <label class="formLabel">Längengrad</label>
-    <DegreeInput bind:degree={longitude}></DegreeInput>
+    <div id="inputs">
+        <div id="locationFields">
+            <div class="inputWrapper">
+                <label class="formLabel">Längengrad</label>
+                <DegreeInput bind:degree={longitude}></DegreeInput>
+            </div>
 
-    <label class="formLabel">Breitengrad</label>
-    <DegreeInput bind:degree={latitude}></DegreeInput>
+            <div class="inputWrapper">
+                <label class="formLabel">Breitengrad</label>
+                <DegreeInput bind:degree={latitude}></DegreeInput>
+            </div>
 
-    <label class="formLabel">Minimale Höhe</label>
-    <div class="inputUnitDiv"><input min="0" max="180" class="input " type="number"
-                                     bind:value="{calculateRequest.minimumHeight}"/> <span class="unit">°</span></div>
+            <div class="inputWrapper">
+                <label class="formLabel">Minimale Höhe</label>
+                <div class="inputUnitDiv">
+                    <input min="0" max="180" class="input " type="number"
+                           bind:value="{calculateRequest.minimumHeight}"/>
+                    <span class="unit">°</span>
+                </div>
+            </div>
 
-    <label class="formLabel">Start der Observation</label>
-    <div id="dateInput">
-        <input type="datetime-local" bind:value={dateStr}>
+            <div class="inputWrapper">
+                <label class="formLabel">Start der Observation</label>
+                <div id="dateInput">
+                    <input type="datetime-local" bind:value={dateStr}>
+                </div>
+            </div>
+
+
+            <div class="inputWrapper">
+                <label class="formLabel">Hemisphäre</label>
+                <select bind:value={calculateRequest.hemisphere}>
+                    <option value="E">Osten</option>
+                    <option value="W">Westen</option>
+                </select></div>
+        </div>
+
+        <div id="viewFields">
+            <div class="inputWrapper">
+                <label class="formLabel">Brennweite</label>
+                <div>
+                    <input class="input inMM" min="0" type="number" id="focalLInput"
+                           bind:value="{calculateRequest.telescope.focalLength}"/>
+                    <span class="unit mm">mm</span>
+                </div>
+            </div>
+
+            <div class="inputWrapper">
+                <label class="formLabel">FOV Höhe</label>
+                <div class="inputUnitDiv">
+                    <input min="0" max="180" class="input " id="fovHeight" type="number"
+                           bind:value="{calculateRequest.fov.height}"/>
+                    <span class="unit">°</span>
+                </div>
+            </div>
+
+            <div class="inputWrapper">
+                <label class="formLabel">FOV Breite</label>
+                <div class="inputUnitDiv">
+                    <input min="0" max="180" class="input " id="fovWidth" type="number"
+                           bind:value="{calculateRequest.fov.width}"/>
+                    <span class="unit">°</span>
+                </div>
+            </div>
+
+
+            <div class="inputWrapper">
+                <label class="formLabel">FOV Azimut Position</label>
+                <div class="inputUnitDiv">
+                    <input min="0" max="180" class="input " id="fovAzimut" type="number"
+                           bind:value="{fovPos.pos.azimuth}"/><span
+                        class="unit">°</span>
+                </div>
+            </div>
+
+
+            <div class="inputWrapper">
+                <label class="formLabel">FOV Höhe Position</label>
+                <div class="inputUnitDiv"><input min="0" max="90" class="input " id="fovWeight" type="number"
+                                                 bind:value="{fovPos.pos.height}"/><span class="unit">°</span>
+                </div>
+            </div>
+
+            <div class="inputWrapper">
+                <label class="formLabel">Belichtungszeit für UGC1</label>
+                <div class="inputUnitDiv">
+                    <input min="0" class="input" id="refExposure" type="number"
+                           bind:value="{calculateRequest.refExposure}"/>
+                    <span class="unit">s</span>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <div class="inputWrapper-nospace">
+        <label class="formLabel">Hole Viewports</label>
+        <div class="inputUnitDiv"><input class="input " type="checkbox"
+                                         bind:checked="{calculateRequest.sendViewports}"/><span class="unit"></span>
+        </div>
+    </div>
 
-    <label class="formLabel">Hemisphäre</label>
-    <select bind:value={calculateRequest.hemisphere}>
-        <option value="E">Osten</option>
-        <option value="W">Westen</option>
-    </select>
-
-    <label class="formLabel">Brennweite</label>
-    <div><input class="input inMM" min="0" type="number" id="focalLInput"
-                bind:value="{calculateRequest.telescope.focalLength}"/><span class="unit mm">mm</span></div>
-
-    <label class="formLabel">FOV Höhe</label>
-    <div class="inputUnitDiv"><input min="0" max="180" class="input " id="fovHeight" type="number"
-                                     bind:value="{calculateRequest.fov.height}"/><span class="unit">°</span></div>
-
-    <label class="formLabel">FOV Breite</label>
-    <div class="inputUnitDiv"><input min="0" max="180" class="input " id="fovWidth" type="number"
-                                     bind:value="{calculateRequest.fov.width}"/><span class="unit">°</span></div>
-
-
-    <label class="formLabel">FOV Azimut Position</label>
-    <div class="inputUnitDiv"><input min="0" max="180" class="input " id="fovAzimut" type="number"
-                                     bind:value="{fovPos.pos.azimuth}"/><span class="unit">°</span></div>
-
-
-    <label class="formLabel">FOV Höhe Position</label>
-    <div class="inputUnitDiv"><input min="0" max="90" class="input " id="fovWeight" type="number"
-                                     bind:value="{fovPos.pos.height}"/><span class="unit">°</span></div>
-
-    <label class="formLabel">Hole Viewports</label>
-    <div class="inputUnitDiv"><input class="input "  type="checkbox"
-                                     bind:checked="{calculateRequest.sendViewports}"/><span class="unit"></span></div>
-
-    <label class="formLabel">Belichtungszeit für UGC1</label>
-    <div class="inputUnitDiv"><input min="0" class="input " id="refExposure" type="number"
-                                     bind:value="{calculateRequest.refExposure}"/><span class="unit">s</span></div>
-
+    <div class="inputWrapper-nospace">
+        <label class="formLabel">Plot typ</label>
+        <select bind:value={type}>
+            <option value="type">Morphologie</option>
+            <option value="quality">Qualitaet</option>
+        </select>
+    </div>
 
     <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
     <Button on:click="{handleUpdateFovRect}">Aktualisiere Fov</Button>
-
 </div>
 
 <style>
     .formLabel {
         flex-direction: row;
-
+        margin-right: 10px;
     }
 
     #inputField {
-        display: grid;
-        grid-template-columns: 200px auto;
-
-        grid-gap: 5px;
-        align-items: start;
-        justify-items: start;
-        height: fit-content;
-        margin-right: 20px;
+        width: 90%;
     }
 
-    .inputUnitDiv {
-        width: fit-content;
+    #locationFields {
+        width: 50%;
+    }
+
+    #viewFields {
+        width: 50%;
+    }
+
+    #inputs {
         display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
     }
 
-    #dateInput {
-        --date-input-width: 100%;
+    .inputWrapper {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px;
     }
-
+    
+    .inputWrapper-nospace {
+        display: flex;
+        margin-right: 10px;
+    }
 
     .input {
-        width: 50px;
+        width: 100px;
         padding-right: 20px;
+        
     }
 
     .input.inMM {

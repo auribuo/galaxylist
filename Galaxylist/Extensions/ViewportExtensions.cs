@@ -1,4 +1,6 @@
-namespace Galaxylist.Lib.Extensions;
+namespace Galaxylist.Extensions;
+
+using Models;
 
 public static partial class Extensions
 {

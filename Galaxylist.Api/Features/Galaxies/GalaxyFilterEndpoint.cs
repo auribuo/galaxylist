@@ -1,11 +1,10 @@
-namespace Galaxylist.Api.Features.V1.Galaxies;
+namespace Galaxylist.Api.Features.Galaxies;
 
-using System.Diagnostics;
+using Data.Repo;
+using Extensions;
 using FastEndpoints;
-using Galaxylist.Lib.Data.Repo;
-using Lib.Data;
-using Lib.Extensions;
-using Lib.Filter.Absolute;
+using Filter;
+using Models;
 
 /// <summary>
 /// Endpoint that returns a list of all used galaxies.
@@ -37,13 +36,6 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 	public override async Task HandleAsync(GalaxyFilterRequest req, CancellationToken ct)
 	{
 		int limit = Query<int>("limit", false);
-		FilterPipeline<Galaxy> pipeline = FilterPipeline<Galaxy>.New()
-																.With(new PositionFilter(req.MinimumHeight))
-																.With(new MeridianFilter(req.Hemisphere))
-																.With(new SizeFilter(req.MaxSemiMajorAxis, req.MaxSemiMinorAxis));
-
-		Stopwatch stopwatch = new();
-		stopwatch.Start();
 		IEnumerable<Galaxy> galaxies = GalaxyDataRepo.Galaxies()
 													 .Select(g =>
 														 {
@@ -54,11 +46,9 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 														 }
 													 );
 
-		List<Galaxy> galaxyList = pipeline.Filter(galaxies)
-										  .ToList();
-
-		stopwatch.Stop();
-		Console.WriteLine($"Filtering took {stopwatch.ElapsedMilliseconds}ms");
+		List<Galaxy> galaxyList = SituationalFilter
+								  .Filter(galaxies, req.Hemisphere, req.MinimumHeight, req.MaxSemiMajorAxis, req.MaxSemiMinorAxis)
+								  .ToList();
 
 		if (limit != 0)
 		{

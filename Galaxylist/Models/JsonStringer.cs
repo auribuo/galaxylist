@@ -1,6 +1,14 @@
 namespace Galaxylist.Models;
 
-public class JsonStringer
+using System.Text.Json;
+
+public abstract class JsonStringer
 {
-	
+	public override string ToString() =>
+		JsonSerializer.Serialize(this,
+								 new JsonSerializerOptions()
+								 {
+									 WriteIndented = true,
+								 }
+		);
 }

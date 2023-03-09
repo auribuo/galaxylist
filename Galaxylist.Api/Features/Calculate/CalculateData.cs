@@ -1,6 +1,6 @@
-namespace Galaxylist.Api.Features.V1.Calculate;
+namespace Galaxylist.Api.Features.Calculate;
 
-using Lib.Models;
+using Models;
 
 /// <summary>
 /// Request schema for the <see cref="CalculateEndpoint"/> endpoint. It supplies the necessary information to calculate the ideal path of galaxies to take.

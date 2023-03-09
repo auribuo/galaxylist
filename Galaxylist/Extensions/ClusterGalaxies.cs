@@ -1,12 +1,13 @@
-using Dbscan;
+namespace Galaxylist.Extensions;
 
-namespace Galaxylist.Lib.Extensions;
+using Dbscan;
+using Models;
 
 public static partial class Extensions
 {
 
     public static ClusterSet<Galaxy> Cluster(this List<Galaxy> galaxies, double epsilon, int minimumPointsPerCluster)
     {
-        return Dbscan.Dbscan.CalculateClusters(galaxies, epsilon, minimumPointsPerCluster);
+        return global::Dbscan.Dbscan.CalculateClusters(galaxies, epsilon, minimumPointsPerCluster);
     }
 }

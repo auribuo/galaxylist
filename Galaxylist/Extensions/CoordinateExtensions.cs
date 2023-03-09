@@ -1,4 +1,6 @@
-namespace Galaxylist.Lib.Extensions;
+namespace Galaxylist.Extensions;
+
+using Models;
 
 // https://de.wikipedia.org/wiki/Sternzeit#Sternzeit_in_Greenwich
 /// <summary>

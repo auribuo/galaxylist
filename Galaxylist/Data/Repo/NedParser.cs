@@ -1,5 +1,6 @@
-namespace Galaxylist.Lib.Data.Repo;
+namespace Galaxylist.Data.Repo;
 
+using Extensions;
 using Pathoschild.Http.Client;
 
 public partial class GalaxyDataRepo

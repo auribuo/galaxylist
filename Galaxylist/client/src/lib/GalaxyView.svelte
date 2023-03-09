@@ -1,7 +1,7 @@
 <script lang="ts">
     import InputFields from "./InputFields.svelte";
     import {CalculateRequest} from "../shared/CalculateRequest";
-    import type {Data, Layout} from "plotly.js-basic-dist-min";
+    import type {Config, Data, Layout, PlotlyHTMLElement} from "plotly.js-basic-dist-min";
     import * as  Plotly from 'plotly.js-basic-dist-min'
     import type {GalaxyResponse} from "../shared/GalaxyResponse";
     import axios, {AxiosError} from "axios";
@@ -11,20 +11,22 @@
     import GalaxyDetail from "./GalaxyDetail.svelte";
     import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
     import {Fov} from "../shared/Fov";
+    import Aladin from "./Aladin.svelte";
 
     const loadingText = "Lade..."
-    
+
     export let apiEndpoint: string = ""
 
     let loading: string = ""
 
+    let plotVisible: boolean = false
+
     let galaxies: GalaxyResponse | null;
     let isFovShown: boolean = false;
 
-    let typeDetailGalaxy: Galaxy | null;
-    let qualityDetailGalaxy: Galaxy | null;
+    let detailGalaxy: Galaxy | null = null
 
-    function createFovTrace(pos: AzimuthalCoordinate, fov: Fov): Data{
+    function createFovTrace(pos: AzimuthalCoordinate, fov: Fov): Data {
         return {
             y: [
                 pos.azimuth - fov.width / 2,
@@ -42,39 +44,40 @@
             ],
             type: 'scatter',
             showlegend: false
-            
+
         }
     }
-    
-    async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
+
+    async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse | null> {
         try {
             const resp = await axios.post<GalaxyResponse>(apiEndpoint, calculateRequest)
             return resp.data as GalaxyResponse
         } catch (e) {
             window.alert("Fehler beim Laden der Galaxien: " + (e as AxiosError).message)
-            return {total: 0, galaxies: [], viewports: []}
+            return null
         }
     }
 
-    const displayGalaxies = async (event: CustomEvent<CalculateRequest>) => {
+    const displayGalaxies = async (event: CustomEvent<{ data: CalculateRequest, type: "type" | "quality" }>) => {
         loading = loadingText
-        galaxies = await getGalaxies(event.detail);
+        galaxies = await getGalaxies(event.detail.data);
+        if (galaxies == null) {
+            loading = ""
+            return
+        }
 
-        const typeData = groupGalaxies(galaxies, "type")
-        
-        const qualityData = groupGalaxies(galaxies, "quality")
+        const data = groupGalaxies(galaxies, event.detail.type)
 
-            if(galaxies.viewports != null){
-            for(let viewport of galaxies.viewports){
-                typeData.push(createFovTrace(viewport.pos, event.detail.fov))
+        if (galaxies.viewports != null) {
+            for (let viewport of galaxies.viewports) {
+                data.push(createFovTrace(viewport.pos, event.detail.data.fov))
             }
         }
 
 
         let layout: Partial<Layout> = {
             xaxis: {
-                range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
-                //range: [0, 360]
+                range: event.detail.data.hemisphere == "E" ? [0, 180] : [180, 360]
             },
             yaxis: {
                 scaleanchor: "x",
@@ -83,38 +86,29 @@
             title: 'Galaxien in Auswahl'
         };
 
-        const config = {responsive: true}
-        const typePlot = await Plotly.newPlot('typePlot', typeData, layout, config);
-        typePlot.on("plotly_click", (data) => {
+        const config: Partial<Config> = {responsive: true, autosizable: true}
+        const plot = await Plotly.newPlot('plot', data, layout, config);
+        plot.on("plotly_click", (data) => {
             const x = data.points[0].x
             const y = data.points[0].y
-            typeDetailGalaxy = galaxies.galaxies.find(g => g.azimuthalCoordinate.azimuth == x && g.azimuthalCoordinate.height == y)
-        })
-        const qualityPlot = await Plotly.newPlot('qualityPlot', qualityData, layout, config);
-        qualityPlot.on("plotly_click", (data) => {
-            const x = data.points[0].x
-            const y = data.points[0].y
-            qualityDetailGalaxy = galaxies.galaxies.find(g => g.azimuthalCoordinate.azimuth == x && g.azimuthalCoordinate.height == y)
+            detailGalaxy = galaxies.galaxies.find(g => g.azimuthalCoordinate.azimuth == x && g.azimuthalCoordinate.height == y)
         })
         loading = ""
+        plotVisible = true
     }
     const updateFov = async (event: CustomEvent<FovViewPort>) => {
         let coord = event.detail;
         let trace: Data = createFovTrace(coord.pos, coord.fov)
 
-       if(isFovShown){
-            await Plotly.deleteTraces('galaxyPlot',0)
+        if (isFovShown) {
+            await Plotly.deleteTraces('typePlot', 0)
         }
-        await Plotly.addTraces('galaxyPlot',[trace],0)
-        isFovShown=true
+        await Plotly.addTraces('typePlot', [trace], 0)
+        isFovShown = true
     };
 
     function handleCloseDetailPanel(type: CustomEvent<"type" | "quality">) {
-        if (type.detail === "type") {
-            typeDetailGalaxy = null
-        } else {
-            qualityDetailGalaxy = null
-        }
+        detailGalaxy = null
     }
 </script>
 <div id="galaxyView">
@@ -132,26 +126,22 @@
     <br/>
     <div id="plotArea">
         <div class="plotContainer">
-            <div id="typePlot" class="galaxyPlot"></div>
-            {#if typeDetailGalaxy != null}
-                <div class="galaxyInfo">
-                    <GalaxyDetail galaxy="{typeDetailGalaxy}" type="type" on:closePanel={handleCloseDetailPanel}>
-                    </GalaxyDetail>
-                </div>
-            {/if}
-        </div>
-        <div class="plotContainer">
-            <div id="qualityPlot" class="galaxyPlot"></div>
-            {#if qualityDetailGalaxy != null}
-                <div class="galaxyInfo">
-                    <GalaxyDetail galaxy="{qualityDetailGalaxy}" type="quality" on:closePanel={handleCloseDetailPanel}>
-                    </GalaxyDetail>
-                </div>
-            {/if}
+            <div id="plot" class="galaxyPlot"></div>
         </div>
     </div>
-
+    {#if detailGalaxy != null}
+        <div class="galaxyInfo">
+            <GalaxyDetail galaxy="{detailGalaxy}" type="quality"
+                          on:closePanel={handleCloseDetailPanel}>
+            </GalaxyDetail>
+        </div>
+    {/if}
 </div>
+
+
+{#if detailGalaxy != null }
+    <Aladin ugcNumber="{detailGalaxy.ugcNumber}"></Aladin>
+{/if}
 
 <style>
     #galaxyView {
@@ -163,7 +153,7 @@
 
         width: 100%;
     }
-    
+
     .loading {
         display: flex;
         flex-direction: column;
@@ -172,7 +162,7 @@
         height: 100%;
         width: 100%;
     }
-    
+
     .loadingText {
         font-size: 2em;
     }
@@ -194,14 +184,13 @@
 
     .galaxyInfo {
         height: 100%;
-        width: 25%;
+        width: 100%;
     }
 
     .galaxyPlot {
         aspect-ratio: 1/1;
         width: 100%;
         margin: 10px;
-        background-color: black;
     }
 
 

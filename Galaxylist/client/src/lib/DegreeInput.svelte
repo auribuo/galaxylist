@@ -18,7 +18,7 @@
         flex-direction: row;
     }
     .input{
-        width: 50px;
+        width: 80px;
         padding-right: 20px;
     }
     .unit{

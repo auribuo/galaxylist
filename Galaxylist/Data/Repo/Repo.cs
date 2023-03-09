@@ -1,6 +1,6 @@
-namespace Galaxylist.Lib.Data.Repo;
+namespace Galaxylist.Data.Repo;
 
-using Pathoschild.Http.Client;
+using Models;
 
 /// <summary>
 /// Data repository for the UGC catalog. Fetches the catalog from the CDS and parses it into a list of galaxies.
