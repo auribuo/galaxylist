@@ -26,5 +26,8 @@ export class CalculateRequest {
     minimumMinorAxis: number = 10;
     hemisphere: "W" | "E" = "W";
     
-    sendviewports: boolean =false;
+    
+    sendViewports: boolean =false;
+    
+    refExposure: number = 60
 }

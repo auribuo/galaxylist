@@ -91,11 +91,14 @@
                                      bind:value="{fovPos.pos.height}"/><span class="unit">°</span></div>
 
     <label class="formLabel">Hole Viewports</label>
-    <div class="inputUnitDiv"><input min="0" max="90" class="input "  type="checkbox"
-                                     bind:checked="{calculateRequest.sendviewports}"/><span class="unit"></span></div>
+    <div class="inputUnitDiv"><input class="input "  type="checkbox"
+                                     bind:checked="{calculateRequest.sendViewports}"/><span class="unit"></span></div>
 
-    
-    
+    <label class="formLabel">Belichtungszeit für UGC1</label>
+    <div class="inputUnitDiv"><input min="0" class="input " id="refExposure" type="number"
+                                     bind:value="{calculateRequest.refExposure}"/><span class="unit">s</span></div>
+
+
     <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
     <Button on:click="{handleUpdateFovRect}">Aktualisiere Fov</Button>
 

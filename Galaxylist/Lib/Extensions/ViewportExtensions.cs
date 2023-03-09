@@ -122,7 +122,7 @@ public static partial class Extensions
 						if (viewports[(xSearch, ySearch)]
 						    .Galaxies.Count < 1)
 						{
-							viewports.Remove((xSearch, ySearch));
+							//viewports.Remove((xSearch, ySearch));
 						}
 					}
 					catch (Exception)

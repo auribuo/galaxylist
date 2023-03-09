@@ -1,10 +1,10 @@
 <script lang="ts">
     import InputFields from "./InputFields.svelte";
     import {CalculateRequest} from "../shared/CalculateRequest";
+    import type {Data, Layout} from "plotly.js-basic-dist-min";
     import * as  Plotly from 'plotly.js-basic-dist-min'
     import type {GalaxyResponse} from "../shared/GalaxyResponse";
     import axios, {AxiosError} from "axios";
-    import type {Data, Layout} from "plotly.js-basic-dist-min";
     import {groupGalaxies} from "../shared/Plot";
     import {FovViewPort} from "../shared/FovViewPort";
     import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
@@ -19,26 +19,23 @@
   
     
     function createFovTrace(pos: AzimuthalCoordinate, fov: Fov): Data{
-        let ret: Data= {
-            x: [
-                pos.azimuth - fov.width/2,
-                pos.azimuth + fov.width/2,
-                pos.azimuth + fov.width/2,
-                pos.azimuth - fov.width/2,
-                pos.azimuth - fov.width/2,
-            ],
+        return {
             y: [
-                pos.height + fov.height/2,
-                pos.height + fov.height/2,
-                pos.height - fov.height/2,
-                pos.height - fov.height/2,
-                pos.height + fov.height/2,
+                pos.azimuth - fov.width / 2,
+                pos.azimuth + fov.width / 2,
+                pos.azimuth + fov.width / 2,
+                pos.azimuth - fov.width / 2,
+                pos.azimuth - fov.width / 2,
             ],
-            type: 'scatter',
-            showlegend: false
+            x: [
+                pos.height + fov.height / 2,
+                pos.height + fov.height / 2,
+                pos.height - fov.height / 2,
+                pos.height - fov.height / 2,
+                pos.height + fov.height / 2,
+            ],
+            type: 'scatter'
         }
-        
-        return ret
     }
 
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {

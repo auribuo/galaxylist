@@ -44,9 +44,8 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 	{
 		int limit = Query<int>("limit", false);
 		FilterPipeline<Galaxy> pipeline = FilterPipeline<Galaxy>.New()
-																.With(new PositionFilter(req.MinimumHeight))
-																.With(new MeridianFilter(req.Hemisphere))
-																.With(new SizeFilter(req.MaxSemiMajorAxis, req.MaxSemiMinorAxis));
+			.With(new PositionFilter(req.MinimumHeight))
+			.With(new MeridianFilter(req.Hemisphere)).With(new SizeFilter(req.MaxSemiMajorAxis, req.MaxSemiMinorAxis));
 
 		IEnumerable<Galaxy> galaxies = _repo.Galaxies()
 											.Select(g =>
@@ -60,13 +59,14 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 
 		List<Galaxy> galaxyList = pipeline.Filter(galaxies)
 										  .ToList();
-
+		
 		if (limit != 0)
 		{
 			galaxyList = galaxyList.Take(limit)
 								   .ToList();
 		}
-
+		
+		
 		GalaxyResponse ret = new GalaxyResponse()
 		{
 			Total = galaxyList.Count,
