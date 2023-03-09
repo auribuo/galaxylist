@@ -109,6 +109,7 @@ public class GenericFilter
 		}
 
 		data.ObservationStart = nextTime;
+		next.MarkAt(nextTime);
 		newObjectList.Where(path.Contains)
 					 .ToList()
 					 .ForEach(x => x.Visit());

@@ -66,11 +66,6 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 					  .ToList()
 					  .ForEach(x => x.Reset());
 
-		Console.WriteLine(filteredResults[0]
-						  .GetType()
-						  .Name
-		);
-
 		await SendAsync(new CalculateResponse
 			{
 				Total = filteredResults.Count,
@@ -87,8 +82,7 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 				GalaxyPathViewports = filteredResults[0] switch
 				{
 					Galaxy => filteredResults.Cast<Galaxy>()
-											 .CalculateViewports(req.Fov, req.Location, req.ObservationStart)
-											 .ToList(),
+											 .CalculateViewports(req.Fov, req.Location, req.ObservationStart, req.RasterApprox),
 					var _ => new List<Viewport>(),
 				},
 				ViewportPath = filteredResults[0] switch

@@ -1,8 +1,8 @@
 import type {GalaxyResponse} from "./GalaxyResponse";
-import type {Data} from "plotly.js-basic-dist-min";
+import type {Data, PlotData} from "plotly.js-basic-dist-min";
 import type {Galaxy} from "./Galaxy";
 
-function groupByQuality(data: Galaxy[]): Data[] {
+function groupByQuality(data: Galaxy[]): Partial<PlotData>[] {
     const less10 = data.filter(g => g.quality < 10);
     const between = data.filter(g => g.quality >= 10 && g.quality <= 30);
     const more30 = data.filter(g => g.quality > 30);
@@ -13,7 +13,7 @@ function groupByQuality(data: Galaxy[]): Data[] {
             text: less10.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
             name: "Quality < 10",
             hoverinfo: "x+y+text",
-            mode: "markers",
+            mode: "lines+markers",
             type: "scatter",
             marker: {size: 5}
         },
@@ -23,7 +23,7 @@ function groupByQuality(data: Galaxy[]): Data[] {
             text: between.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
             name: "Quality between 10 and 30",
             hoverinfo: "x+y+text",
-            mode: "markers",
+            mode: "lines+markers",
             type: "scatter",
             marker: {size: 5}
         },
@@ -33,14 +33,14 @@ function groupByQuality(data: Galaxy[]): Data[] {
             text: more30.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
             name: "Quality > 30",
             hoverinfo: "x+y+text",
-            mode: "markers",
+            mode: "lines+markers",
             type: "scatter",
             marker: {size: 5}
         }
     ]
 }
 
-export function groupGalaxies(data: Galaxy[], strategy: "type" | "quality"): Data[] {
+export function groupGalaxies(data: Galaxy[], strategy: "type" | "quality"): Partial<PlotData>[] {
     if (strategy === "type") {
         return groupByType(data);
     } else {
@@ -48,8 +48,8 @@ export function groupGalaxies(data: Galaxy[], strategy: "type" | "quality"): Dat
     }
 }
 
-function groupByType(data: Galaxy[]): Data[] {
-    const result: Data[] = [];
+function groupByType(data: Galaxy[]): Partial<PlotData>[] {
+    const result: Partial<PlotData>[] = [];
     const types = new Set(data.map(g => g.morphology));
     types.forEach(type => {
         const galaxies = data.filter(g => g.morphology === type);
@@ -59,7 +59,7 @@ function groupByType(data: Galaxy[]): Data[] {
             text: galaxies.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
             name: type,
             hoverinfo: "x+y+text",
-            mode: "markers",
+            mode: "lines+markers",
             type: "scatter",
             marker: {size: 5}
         })

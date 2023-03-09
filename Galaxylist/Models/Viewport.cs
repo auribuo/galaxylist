@@ -59,4 +59,16 @@ public class Viewport : IRatableObject
 	public double WaitTime(double distance) => Galaxies.Max(x => x.CalculateExposure(distance));
 
 	public double Exposure() => Galaxies.Max(x => x.Exposure());
+
+	public DateTime? At() =>
+		Galaxies.First()
+				.At;
+
+	public DateTime? MarkAt(DateTime timestamp)
+	{
+		Galaxies.ToList()
+				.ForEach(x => x.MarkAt(timestamp));
+
+		return timestamp;
+	}
 }

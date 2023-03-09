@@ -15,6 +15,17 @@ public class Galaxy : IPointData, IRatableObject
 	private const int BASE_TIME_UGC2 = 536;
 
 	private bool _visited;
+	private DateTime? _at;
+
+	DateTime? IRatableObject.At() => _at;
+	public DateTime? At => _at;
+
+	public DateTime? MarkAt(DateTime timestamp)
+	{
+		_at = timestamp;
+
+		return _at;
+	}
 
 	/// <summary>
 	/// The morphology of the galaxy.

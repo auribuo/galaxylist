@@ -164,8 +164,7 @@ public static partial class Extensions
 								viewport.Pos.Declination.ToDegrees() + fov.Height / 2);
 							EquatorialCoordinate bottomLeft = (viewport.Pos.RightAscention.ToDegree() - fov.Width / 2,
 								viewport.Pos.Declination.ToDegrees() - fov.Height / 2);
-							;
-							EquatorialCoordinate bottomRight = (viewport.Pos.RightAscention.ToDegree() + fov.Width / 2,
+						EquatorialCoordinate bottomRight = (viewport.Pos.RightAscention.ToDegree() + fov.Width / 2,
 								viewport.Pos.Declination.ToDegrees() + fov.Height / 2);
 							;
 							viewport.TopLeft = topLeft.ToAzimuthal(time.Value, location);
@@ -180,7 +179,7 @@ public static partial class Extensions
 			}*/
 		}
 
-		foreach (Galaxy galaxy in galaxies)
+		/*foreach (Galaxy galaxy in galaxies)
 		{
 			double xApprox = GetNearestDeg(galaxy.AzimuthalCoordinate!.Value.Azimuth, xStep);
 			double yApprox = GetNearestDeg(galaxy.AzimuthalCoordinate.Value.Height, yStep);
@@ -209,7 +208,7 @@ public static partial class Extensions
 					}
 				}
 			}
-		}
+		}*/
 
 		return new List<Viewport>(viewports.Values);
 	}
