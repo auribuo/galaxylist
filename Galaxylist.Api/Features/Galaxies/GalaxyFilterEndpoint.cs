@@ -64,7 +64,7 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 
 		if (req.SendViewports)
 		{
-			ret.Viewports = galaxyList.CalculateViewports(req.Fov, req.RasterApprox);
+			ret.Viewports = galaxyList.CalculateViewports(req.Fov, req.Location, req.ObservationStart, req.RasterApprox);
 		}
 
 		await SendAsync(ret);

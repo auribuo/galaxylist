@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Data model of a single galaxy.
 /// </summary>
-public class Galaxy : JsonStringer, IPointData, IRatableObject
+public class Galaxy : IPointData, IRatableObject
 {
 	public override string ToString() => JsonConvert.SerializeObject(this, Formatting.Indented);
 
@@ -119,7 +119,7 @@ public class Galaxy : JsonStringer, IPointData, IRatableObject
 	/// </summary>
 	public double ExposureTime => CalculateExposureTime(BASE_TIME_UGC2);
 
-	private double CalculateExposureTime(double baseTime) => baseTime * Math.Pow(Distance / DST_UGC2, 2);
+	private double CalculateExposureTime(double baseTime) => baseTime * Math.Pow(Distance <= 0 ? 100 : Distance / DST_UGC2, 2);
 
 	private static double SlewFunction(double distance) => 1 / 2d * distance + 6;
 
@@ -155,4 +155,6 @@ public class Galaxy : JsonStringer, IPointData, IRatableObject
 
 	public AzimuthalCoordinate Position() =>
 		AzimuthalCoordinate ?? throw new InvalidOperationException("The galaxy has no azimuthal coordinate");
+
+	public double Exposure() => ExposureTime;
 }

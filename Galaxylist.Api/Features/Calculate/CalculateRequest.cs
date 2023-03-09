@@ -7,5 +7,4 @@ using Models;
 /// </summary>
 public class CalculateRequest : CalculationData
 {
-	
 }
