@@ -9,7 +9,7 @@ function groupByQuality(data: GalaxyResponse): Data[] {
         {
             x: less10.map(g => g.azimuthalCoordinate.azimuth),
             y: less10.map(g => g.azimuthalCoordinate.height),
-            text: less10.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.morphology})`),
+            text: less10.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
             name: "Quality < 10",
             hoverinfo: "x+y+text",
             mode: "markers",
@@ -19,7 +19,7 @@ function groupByQuality(data: GalaxyResponse): Data[] {
         {
             x: between.map(g => g.azimuthalCoordinate.azimuth),
             y: between.map(g => g.azimuthalCoordinate.height),
-            text: between.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.morphology})`),
+            text: between.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
             name: "Quality between 10 and 30",
             hoverinfo: "x+y+text",
             mode: "markers",
@@ -29,7 +29,7 @@ function groupByQuality(data: GalaxyResponse): Data[] {
         {
             x: more30.map(g => g.azimuthalCoordinate.azimuth),
             y: more30.map(g => g.azimuthalCoordinate.height),
-            text: more30.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.morphology})`),
+            text: more30.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
             name: "Quality > 30",
             hoverinfo: "x+y+text",
             mode: "markers",
@@ -55,7 +55,7 @@ function groupByType(data: GalaxyResponse): Data[] {
         result.push({
             x: galaxies.map(g => g.azimuthalCoordinate.azimuth),
             y: galaxies.map(g => g.azimuthalCoordinate.height),
-            text: galaxies.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.morphology})`),
+            text: galaxies.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
             name: type,
             hoverinfo: "x+y+text",
             mode: "markers",
