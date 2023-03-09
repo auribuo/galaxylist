@@ -5,7 +5,7 @@ import type {AzimuthalCoordinate} from "./AzimuthalCoordinate";
 
 
 export class Galaxy {
-    hubbleType: string = "";
+    morphology: string = "";
     ugcNumber: number = 0;
     magnitude: number = 0;
     equatorialCoordinate: EquatorialCoordinate;
