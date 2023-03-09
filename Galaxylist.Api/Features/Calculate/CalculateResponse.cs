@@ -17,5 +17,7 @@ public class CalculateResponse
 	/// </summary>
 	public required List<Galaxy> Galaxies { get; set; }
 	
+
 	
+	public List<Viewport> Viewports { get; set; }	
 }

@@ -1,3 +1,5 @@
+using Galaxylist.Lib.Extensions;
+
 namespace Galaxylist.Models;
 
 /// <summary>

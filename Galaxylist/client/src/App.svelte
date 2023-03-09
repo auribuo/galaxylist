@@ -4,9 +4,9 @@
     import GalaxyView from "./lib/GalaxyView.svelte";
     import InputFields from "./lib/InputFields.svelte";
 
-    let apiEndpoint = "http://localhost:5244/api/galaxies"
+    let apiEndpoint = "http://localhost:5244/api"
 </script>
 
 <main>
-    <GalaxyView bind:apiEndpoint={apiEndpoint}></GalaxyView>
+    <GalaxyView bind:apiEndpoint={apiEndpoint} ></GalaxyView>
 </main>

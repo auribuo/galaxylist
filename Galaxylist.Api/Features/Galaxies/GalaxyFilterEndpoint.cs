@@ -55,7 +55,6 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 			galaxyList = galaxyList.Take(limit)
 								   .ToList();
 		}
-
 		GalaxyResponse ret = new()
 		{
 			Total = galaxyList.Count,
@@ -64,7 +63,7 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 
 		if (req.SendViewports)
 		{
-			ret.Viewports = galaxyList.CalculateViewports(req.Fov, req.RasterApprox);
+			ret.Viewports = galaxyList.CalculateViewports(req.Fov, req.Location, req.ObservationStart, req.RasterApprox);
 		}
 
 		await SendAsync(ret);

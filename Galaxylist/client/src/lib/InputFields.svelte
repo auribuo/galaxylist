@@ -14,8 +14,8 @@
     import {FovViewPort} from "../shared/FovViewPort";
 
     const dispatch = createEventDispatcher<{
-        submitted: { data: CalculateRequest, type: string },
-        updateFov: FovViewPort
+        submitted: { data: CalculateRequest, type: string }
+        calculate:  CalculateRequest
     }>();
     export let calculateRequest: CalculateRequest = new CalculateRequest()
     let type: "type" | "quality" = "type";
@@ -23,6 +23,8 @@
     export let longitude: Degree = Converter.degreeToDegreeComponents(calculateRequest.location.longitude);
     export let fovPos: FovViewPort = new FovViewPort();
 
+    calculateRequest.fov.height = 0.5
+    calculateRequest.fov.width = 0.8
 
     async function handleSubmitClick() {
         calculateRequest.observationStartDate = new Date(dateStr)
@@ -34,10 +36,10 @@
         dispatch('submitted', {data: calculateRequest, type});
     }
 
-    async function handleUpdateFovRect() {
-        fovPos.fov.height = calculateRequest.fov.height;
-        fovPos.fov.width = calculateRequest.fov.width;
-        dispatch('updateFov', fovPos)
+
+    async function handleCalculateClick(){
+        
+        dispatch('calculate', calculateRequest)
     }
 
 
@@ -48,21 +50,20 @@
     <div id="inputs">
         <div id="locationFields">
             <div class="inputWrapper">
-                <label class="formLabel">Längengrad</label>
+                <label class="formLabel">Längengrad [°/'/'']</label>
                 <DegreeInput bind:degree={longitude}></DegreeInput>
             </div>
 
             <div class="inputWrapper">
-                <label class="formLabel">Breitengrad</label>
+                <label class="formLabel">Breitengrad [°]</label>
                 <DegreeInput bind:degree={latitude}></DegreeInput>
             </div>
 
             <div class="inputWrapper">
-                <label class="formLabel">Minimale Höhe</label>
+                <label class="formLabel">Minimale Höhe [°]</label>
                 <div class="inputUnitDiv">
                     <input min="0" max="180" class="input " type="number"
                            bind:value="{calculateRequest.minimumHeight}"/>
-                    <span class="unit">°</span>
                 </div>
             </div>
 
@@ -84,56 +85,56 @@
 
         <div id="viewFields">
             <div class="inputWrapper">
-                <label class="formLabel">Brennweite</label>
+                <label class="formLabel">Brennweite [mm]</label>
                 <div>
                     <input class="input inMM" min="0" type="number" id="focalLInput"
                            bind:value="{calculateRequest.telescope.focalLength}"/>
-                    <span class="unit mm">mm</span>
                 </div>
             </div>
 
             <div class="inputWrapper">
-                <label class="formLabel">FOV Höhe</label>
+                <label class="formLabel">FOV Höhe [°]</label>
                 <div class="inputUnitDiv">
                     <input min="0" max="180" class="input " id="fovHeight" type="number"
                            bind:value="{calculateRequest.fov.height}"/>
-                    <span class="unit">°</span>
+                    <span class="unit"></span>
                 </div>
             </div>
 
             <div class="inputWrapper">
-                <label class="formLabel">FOV Breite</label>
+                <label class="formLabel">FOV Breite [°]</label>
                 <div class="inputUnitDiv">
                     <input min="0" max="180" class="input " id="fovWidth" type="number"
                            bind:value="{calculateRequest.fov.width}"/>
-                    <span class="unit">°</span>
+                    <span class="unit"></span>
                 </div>
             </div>
 
 
+            
+            <!--TODO Remove-->
             <div class="inputWrapper">
-                <label class="formLabel">FOV Azimut Position</label>
+                <label class="formLabel">FOV Azimut Position [°]</label>
                 <div class="inputUnitDiv">
                     <input min="0" max="180" class="input " id="fovAzimut" type="number"
                            bind:value="{fovPos.pos.azimuth}"/><span
-                        class="unit">°</span>
+                        class="unit"></span>
                 </div>
             </div>
 
 
             <div class="inputWrapper">
-                <label class="formLabel">FOV Höhe Position</label>
+                <label class="formLabel">FOV Höhe Position [°]</label>
                 <div class="inputUnitDiv"><input min="0" max="90" class="input " id="fovWeight" type="number"
-                                                 bind:value="{fovPos.pos.height}"/><span class="unit">°</span>
+                                                 bind:value="{fovPos.pos.height}"/><span class="unit"></span>
                 </div>
             </div>
 
             <div class="inputWrapper">
-                <label class="formLabel">Belichtungszeit für UGC1</label>
+                <label class="formLabel">Belichtungszeit für UGC1 [s]</label>
                 <div class="inputUnitDiv">
                     <input min="0" class="input" id="refExposure" type="number"
                            bind:value="{calculateRequest.refExposure}"/>
-                    <span class="unit">s</span>
                 </div>
             </div>
         </div>
@@ -146,7 +147,7 @@
         </div>
     </div>
 
-    <div class="inputWrapper-nospace">
+    <div class="inputWrapper-nospace" id="plotType">
         <label class="formLabel">Plot typ</label>
         <select bind:value={type}>
             <option value="type">Morphologie</option>
@@ -155,7 +156,7 @@
     </div>
 
     <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
-    <Button on:click="{handleUpdateFovRect}">Aktualisiere Fov</Button>
+    <Button on:click="{handleCalculateClick}">Berechne Besten Weg</Button>
 </div>
 
 <style>
@@ -183,6 +184,10 @@
         align-items: center;
         justify-content: center;
     }
+    #plotType{
+        margin-top: 12px;
+    }
+    
 
     .inputWrapper {
         display: flex;
@@ -193,26 +198,15 @@
     .inputWrapper-nospace {
         display: flex;
         margin-right: 10px;
+        
     }
 
     .input {
         width: 100px;
-        padding-right: 20px;
         
     }
 
-    .input.inMM {
-        padding-right: 40px;
-    }
 
-    .unit {
-        margin-left: -20px;
-        margin-right: 5px;
-    }
 
-    .unit.mm {
-        margin-left: -40px;
-        margin-right: 10px;
-    }
 
 </style>

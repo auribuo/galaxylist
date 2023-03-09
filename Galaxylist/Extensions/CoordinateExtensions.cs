@@ -24,9 +24,7 @@ public static partial class Extensions
 		double deklination = (coordinate.Declination.ToDegrees()+360)%360;
 		double julianDate = ToJulianDate(dateTime);
 		double t = JulianDateDifferenceConstant(julianDate);
-		
-		
-		
+
 		double gmst0 = Gmst(t);
 		
 
@@ -61,17 +59,13 @@ public static partial class Extensions
 		// Ist dies der Fall, werden dem Azimut 180° addiert. (Arctan hat 2 Lösungen)
 		double azimutDeg = RadToDeg(azimut);
 		azimutDeg = (azimutDeg + 360*5) % 360;
-
-
-	
+		
 		
 		if (GetQudrant(azimutDeg) == GetQudrant(stundenWinkel))
 		{
 			azimutDeg = (azimutDeg + 180) % 360;
 		}
 		
-		
-
 		/*Console.WriteLine("T: "+ t);
 		Console.WriteLine("Greenwich time: "+ gmstT);
 		Console.WriteLine("Datum: "+ julianDate);
