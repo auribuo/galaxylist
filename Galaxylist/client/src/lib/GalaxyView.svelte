@@ -40,7 +40,9 @@
                 pos.height - fov.height / 2,
                 pos.height + fov.height / 2,
             ],
-            type: 'scatter'
+            type: 'scatter',
+            showlegend: false
+            
         }
     }
     
