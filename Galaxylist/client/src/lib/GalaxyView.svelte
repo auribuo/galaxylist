@@ -12,7 +12,7 @@
     import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
     import {Fov} from "../shared/Fov";
 
-    
+    const loadingText = "Lade..."
     
     export let apiEndpoint: string = ""
 
@@ -55,6 +55,7 @@
     }
 
     const displayGalaxies = async (event: CustomEvent<CalculateRequest>) => {
+        loading = loadingText
         galaxies = await getGalaxies(event.detail);
 
         const typeData = groupGalaxies(galaxies, "type")
@@ -80,8 +81,7 @@
             title: 'Galaxien in Auswahl'
         };
 
-        const config = {responsive: true, }
-        loading = "Loading..."
+        const config = {responsive: true}
         const typePlot = await Plotly.newPlot('typePlot', typeData, layout, config);
         typePlot.on("plotly_click", (data) => {
             const x = data.points[0].x
@@ -120,7 +120,13 @@
             on:submitted={displayGalaxies}
             on:updateFov={updateFov}>
     </InputFields>
-    <div>{loading}</div>
+    {#if loading === loadingText}
+        <div class="loading">
+            <div class="loadingText">
+                {loading}
+            </div>
+        </div>
+    {/if}
     <br/>
     <div id="plotArea">
         <div class="plotContainer">
@@ -155,11 +161,25 @@
 
         width: 100%;
     }
+    
+    .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+    }
+    
+    .loadingText {
+        font-size: 2em;
+    }
 
     #plotArea {
         display: flex;
         flex-direction: column;
-        width: 50%;
+        width: 100%;
+        height: 100%;
     }
 
     .plotContainer {
@@ -181,4 +201,6 @@
         margin: 10px;
         background-color: black;
     }
+
+
 </style>
