@@ -62,6 +62,7 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 				Total = galaxyList.Count,
 				TotalQuality = galaxyList.Sum(g => g.Quality),
 				Path = galaxyList,
+				ViewportPath = null
 			}
 		);
 	}

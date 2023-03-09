@@ -74,7 +74,7 @@
  
     async function calculateGalaxies(calculateRequest: CalculateRequest){
         try {
-            const resp = await axios.post<CalculateResponse>(apiEndpoint+ "/galaxies", calculateRequest)
+            const resp = await axios.post<CalculateResponse>(apiEndpoint+ "/calculate/alg", calculateRequest)
             return resp.data as CalculateResponse
         } catch (e) {
             window.alert("Fehler beim Laden der Galaxien: " + (e as AxiosError).message)
@@ -84,7 +84,6 @@
     
     
     const displayGalaxies = async (event: CustomEvent<{ data: CalculateRequest, type: "type" | "quality" }>) => {
-
         loading = loadingText
         galaxies = await getGalaxies(event.detail.data);
         if (galaxies == null) {
@@ -134,13 +133,16 @@
         plotVisible = true
     }
     async function animateViewports(plotDiv: string, data: CalculateResponse) {
-        let fTrace = createFovTrace(data.viewports[0], "yellow", "Start")
-        let lTrace = createFovTrace(data.viewports[data.viewports.length-1], "green", "Ende")
+        
+        
+        
+        let fTrace = createFovTrace(data.viewportPath[0], "yellow", "Start")
+        let lTrace = createFovTrace(data.viewportPath[data.viewportPath.length-1], "green", "Ende")
         Plotly.addTraces(plotDiv,fTrace,0)
         Plotly.addTraces(plotDiv,lTrace,0)
         
         let firstTrace: Boolean = true
-        for(let viewport of data.viewports){
+        for(let viewport of data.viewportPath){
             console.log(viewport)
             if(firstTrace){
                firstTrace=false 
@@ -172,9 +174,17 @@
         let result: CalculateResponse = await calculateGalaxies(event.detail);
                  
       
-         const data = groupGalaxies(result, "quality")
-
-
+         const data: Data =  {
+                 x: result.path.map(galaxy => galaxy.azimuthalCoordinate.azimuth),
+                 y: result.path.map(galaxy => galaxy.azimuthalCoordinate.height),
+                 text: result.path.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
+                 name: "Galaxie",
+                 hoverinfo: "x+y+text",
+                 mode: "markers",
+                 type: "scatter",
+                 marker: {size: 5}
+             }
+             
          let layout: Partial<Layout> = {
              xaxis: {
                  range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
@@ -187,18 +197,19 @@
          };
 
          const config: Partial<Config> = {responsive: true, autosizable: true}
-         const plot = await Plotly.newPlot('plot', data, layout, config);
+         const plot = await Plotly.newPlot('plot', [data], layout, config);
          
          plot.on("plotly_click", (data) => {
              const x = data.points[0].x
              const y = data.points[0].y
              detailGalaxy = galaxies.galaxies.find(g => g.azimuthalCoordinate.azimuth == x && g.azimuthalCoordinate.height == y)
          })
+         if(result.viewportPath!=undefined) {
+             animateViewports('plot', result);
+         }
          
-         animateViewports('plot',result);
-         
-        loading = ""
-        plotVisible = true
+         loading = ""
+         plotVisible = true
     };
 </script>
 <div id="galaxyView">

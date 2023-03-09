@@ -14,13 +14,6 @@ public class CalculateResponse
 
 	public required double TotalQuality { get; set; }
 
-	/// <summary>
-	/// The list of galaxies calculated
-	/// </summary>
-	public required List<Galaxy> Galaxies { get; set; }
-	
-
-	
-	public List<Viewport> Viewports { get; set; }	
+	public required List<Viewport>? ViewportPath { get; set; } = null;
 	public required List<Galaxy> Path { get; set; }
 }
