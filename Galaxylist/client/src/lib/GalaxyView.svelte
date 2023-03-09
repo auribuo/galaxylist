@@ -11,8 +11,6 @@
     import GalaxyDetail from "./GalaxyDetail.svelte";
     import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
     import {Fov} from "../shared/Fov";
-    import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
-    import {Fov} from "../shared/Fov";
 
     
     
@@ -63,7 +61,7 @@
         
         const qualityData = groupGalaxies(galaxies, "quality")
 
-        if(galaxies.viewports != null){
+            if(galaxies.viewports != null){
             for(let viewport of galaxies.viewports){
                 typeData.push(createFovTrace(viewport.pos, event.detail.fov))
             }

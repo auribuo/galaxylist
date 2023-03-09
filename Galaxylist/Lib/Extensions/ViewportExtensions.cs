@@ -30,12 +30,12 @@ public static partial class Extensions
 		viewportPos.Height - fov.Height / 2 < pos.Height && viewportPos.Height + fov.Height / 2 > pos.Height;
 
 	/// <summary>
-	/// 
+	/// Calculates interesting viewports with galaxies in them. Viewports are approximated to the nearest number at  x * fov.Height * rasterApprox and x* fov.Width *rasterApprox
 	/// </summary>
 	/// <param name="galaxies"></param>
-	/// <param name="fov"></param>
-	/// <param name="rasterApprox"></param>
-	/// <returns></returns>
+	/// <param name="fov">Viewport of the camera on the telescope</param>
+	/// <param name="rasterApprox">Approximation factor which represents the fraction in which the fov position is approximated relative to the size of the fov.</param>
+	/// <returns>A list of viewports. One galaxy can be in multiple viewports</returns>
 	public static List<Viewport> CalculateViewports(this List<Galaxy> galaxies, Fov fov, double rasterApprox = 0.25)
 	{
 		Dictionary<(double, double), Viewport> viewports = new();
@@ -47,12 +47,9 @@ public static partial class Extensions
 		Console.WriteLine(fov.Width);
 		Console.WriteLine(xStep);
 		Console.WriteLine(yStep);
-		int n = 1;
-
+	
 		foreach (Galaxy galaxy in galaxies)
 		{
-			n += 1;
-			Console.WriteLine(n);
 			double xApprox = GetNearestDeg(galaxy.AzimuthalCoordinate!.Value.Azimuth, xStep);
 			double yApprox = GetNearestDeg(galaxy.AzimuthalCoordinate.Value.Height, yStep);
 
@@ -103,7 +100,6 @@ public static partial class Extensions
 
 		foreach (Galaxy galaxy in galaxies)
 		{
-			Console.WriteLine(n);
 			double xApprox = GetNearestDeg(galaxy.AzimuthalCoordinate!.Value.Azimuth, xStep);
 			double yApprox = GetNearestDeg(galaxy.AzimuthalCoordinate.Value.Height, yStep);
 
@@ -120,9 +116,9 @@ public static partial class Extensions
 					try
 					{
 						if (viewports[(xSearch, ySearch)]
-						    .Galaxies.Count < 1)
+						    .Galaxies.Count <= 1)
 						{
-							//viewports.Remove((xSearch, ySearch));
+							viewports.Remove((xSearch, ySearch));
 						}
 					}
 					catch (Exception)
@@ -160,7 +156,6 @@ public static partial class Extensions
 		{
 			galaxy.Visit();
 		}
-
 		return quality;
 	}
 }
