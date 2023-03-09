@@ -1,47 +1,35 @@
 namespace Galaxylist.Filter;
 
+using Data.Repo;
+
 public class GenericFilter
 {
-	public static IEnumerable<T> Filter<T>(
-		IEnumerable<T> objects,
-		IObjectRepo<T> repo,
-		DateTime startTime,
-		double searchRadius,
-		int startPointCount = 10,
-		int maxSearchSeconds = 5 * 60 * 60
-	) where T : IRatableObject
+	public static IEnumerable<T> Filter<T>(IEnumerable<T> objects, CalculationData data) where T : class, IRatableObject
 	{
-		var objectsList = objects.ToList();
-		var startPoints = objectsList.OrderByDescending(obj => obj.Quality())
-									 .Take(Math.Min(objectsList.Count, startPointCount));
+		List<T> objectsList = objects.ToList();
+		IEnumerable<T> startPoints = objectsList.OrderByDescending(obj => obj.Quality())
+												.Take(Math.Min(objectsList.Count, data.StartPointCount));
 
-		var paths = new List<List<T>>();
-		var tasks = new List<Task>();
+		List<List<T>> paths = new();
+		Task.WaitAll(startPoints.Select(startPoint => Task.Run(() =>
+										    {
+											    T[] arr = new T[objectsList.Count];
+											    objectsList.CopyTo(arr);
+											    CalculatePath(data, startPoint, arr.ToList(), paths);
+										    }
+									    )
+							    )
+							    .ToArray()
+		);
 
-		foreach (T startPoint in startPoints)
-		{
-			var task = Task.Run(() => CalculatePath(repo,
-													startTime,
-													searchRadius,
-													maxSearchSeconds,
-													startPoint,
-													objectsList,
-													paths
-								)
-			);
-
-			tasks.Add(task);
-		}
-
-		Task.WaitAll(tasks.ToArray());
-		var bestPath = paths.OrderByDescending(x => x.Sum(y => y.Quality()))
-							.First();
+		List<T> bestPath = paths.OrderByDescending(x => x.Sum(y => y.Quality()))
+								.First();
 
 		// check for duplicates
-		var duplicates = bestPath.GroupBy(x => x)
-								 .Where(g => g.Count() > 1)
-								 .Select(g => g.Key)
-								 .ToList();
+		List<T> duplicates = bestPath.GroupBy(x => x)
+									 .Where(g => g.Count() > 1)
+									 .Select(g => g.Key)
+									 .ToList();
 
 		if (duplicates.Any())
 		{
@@ -53,56 +41,35 @@ public class GenericFilter
 		return bestPath;
 	}
 
-	private static Task CalculatePath<T>(
-		IObjectRepo<T> repo,
-		DateTime startTime,
-		double searchRadius,
-		int maxSearchSeconds,
-		T startPoint,
-		List<T> objectsList,
-		List<List<T>> paths
-	) where T : IRatableObject
+	private static void CalculatePath<T>(CalculationData data, T startPoint, IEnumerable<T> objectsList, ICollection<List<T>> paths)
+		where T : class, IRatableObject
 	{
 		List<T> path = new()
 		{
 			startPoint,
 		};
 
-		int elapsedSeconds = 0;
-		Propagate(objectsList,
-				  repo,
-				  startPoint,
-				  searchRadius,
-				  startTime,
-				  path,
-				  maxSearchSeconds,
-				  elapsedSeconds
-		);
-
+		int elapsedSeconds = (int)startPoint.WaitTime(0);
+		Propagate(objectsList, startPoint, path, data, elapsedSeconds);
 		paths.Add(path);
-
-		return Task.CompletedTask;
 	}
 
 	private static void Propagate<T>(
 		IEnumerable<T> objects,
-		IObjectRepo<T> repo,
 		IRatableObject startPoint,
-		double searchRadius,
-		DateTime time,
-		List<T> path,
-		int maxSearchSeconds,
+		ICollection<T> path,
+		CalculationData data,
 		int elapsedSeconds
-	) where T : IRatableObject
+	) where T : class, IRatableObject
 	{
-		if (elapsedSeconds >= maxSearchSeconds)
+		if (elapsedSeconds >= data.MaxSearchSeconds)
 		{
 			return;
 		}
 
 		T next;
 
-		if (Math.Abs(searchRadius - -1) < 10e-6)
+		if (Math.Abs(data.SearchRadius - -1) < 10e-6)
 		{
 			Console.WriteLine("Skipping search radius");
 			next = objects.Where(obj => !path.Contains(obj))
@@ -110,31 +77,36 @@ public class GenericFilter
 		}
 		else
 		{
-			next = objects.Where(obj => obj.DistanceBetween(startPoint) <= searchRadius)
+			next = objects.Where(obj => obj.DistanceBetween(startPoint) <= data.SearchRadius)
 						  .Where(obj => !path.Contains(obj))
 						  .MaxBy(obj => obj.Quality())!;
 		}
 
-		var distance = startPoint.DistanceBetween(next);
-		var waitSec = startPoint.WaitTime(distance);
+		double distance = startPoint.DistanceBetween(next);
+		double waitSec = startPoint.WaitTime(distance);
 		elapsedSeconds += (int)waitSec;
-		var nextTime = time.AddSeconds(waitSec);
-		var newObjects = repo.Fetch()
-							 .ToList();
+		DateTime nextTime = data.ObservationStart.AddSeconds(waitSec);
+		IEnumerable<Galaxy> newObjects = GalaxyDataRepo.Galaxies();
+		List<T> newObjectList;
 
-		newObjects.Where(path.Contains)
-				  .ToList()
-				  .ForEach(x => x.Visit());
+		if (data.SendViewports)
+		{
+			newObjectList = newObjects.CalculateViewports(data.Fov, data.Location, data.ObservationStart)
+									  .Cast<T>()
+									  .ToList();
+		}
+		else
+		{
+			newObjectList = newObjects.Cast<T>()
+									  .ToList();
+		}
+
+		data.ObservationStart = nextTime;
+		newObjectList.Where(path.Contains)
+					 .ToList()
+					 .ForEach(x => x.Visit());
 
 		path.Add(next);
-		Propagate(newObjects,
-				  repo,
-				  next,
-				  searchRadius,
-				  nextTime,
-				  path,
-				  maxSearchSeconds,
-				  elapsedSeconds
-		);
+		Propagate(newObjectList, next, path, data, elapsedSeconds);
 	}
 }

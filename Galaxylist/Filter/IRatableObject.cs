@@ -10,4 +10,6 @@ public interface IRatableObject
 	public void Reset();
 
 	public double WaitTime(double distance);
+
+	public double Exposure();
 }

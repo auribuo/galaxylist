@@ -45,11 +45,20 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 									 );
 
 		galaxies = SituationalFilter.Filter(galaxies, req.Hemisphere, req.MinimumHeight, req.MaxSemiMajorAxis, req.MaxSemiMinorAxis);
-		List<Galaxy> galaxyList = (strat switch
+		var galaxyList = galaxies.ToList();
+		var itemList = galaxyList.ToList<IRatableObject>();
+
+		if (req.SendViewports)
 		{
-			"alg" => GenericFilter.Filter(galaxies, new GalaxyRepo(), req.ObservationStart, 20)
+			itemList = galaxyList.CalculateViewports(req.Fov, req.Location, req.ObservationStart)
+								 .ToList<IRatableObject>();
+		}
+
+		List<IRatableObject> filteredResults = (strat switch
+		{
+			"alg" => GenericFilter.Filter(itemList, req)
 								  .ToList(),
-			"rng" => RandomFilter.Filter(galaxies),
+			"rng" => RandomFilter.Filter(itemList),
 			var _ => throw new ArgumentException($"Invalid strategy: {strat}", nameof(strat)),
 		}).ToList();
 
@@ -57,12 +66,30 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 					  .ToList()
 					  .ForEach(x => x.Reset());
 
+		Console.WriteLine(filteredResults[0]
+						  .GetType()
+						  .Name
+		);
+
 		await SendAsync(new CalculateResponse
 			{
-				Total = galaxyList.Count,
-				TotalQuality = galaxyList.Sum(g => g.Quality),
-				Path = galaxyList,
-				ViewportPath = null
+				Total = filteredResults.Count,
+				TotalQuality = filteredResults.Sum(g => g.Quality()),
+				TotalExposure = filteredResults.Sum(x => x.Exposure()),
+				MaxSearchSeconds = req.MaxSearchSeconds,
+				ExposureDeviation = Math.Abs(req.MaxSearchSeconds - filteredResults.Sum(x => x.Exposure())),
+				GalaxyPath = filteredResults[0] switch
+				{
+					Galaxy => filteredResults.Cast<Galaxy>()
+											 .ToList(),
+					var _ => new List<Galaxy>(),
+				},
+				ViewportPath = filteredResults[0] switch
+				{
+					Viewport => filteredResults.Cast<Viewport>()
+											   .ToList(),
+					var _ => new List<Viewport>(),
+				}
 			}
 		);
 	}
