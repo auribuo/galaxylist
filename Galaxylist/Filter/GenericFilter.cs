@@ -87,6 +87,13 @@ public class GenericFilter
 		elapsedSeconds += (int)waitSec;
 		DateTime nextTime = data.ObservationStart.AddSeconds(waitSec);
 		IEnumerable<Galaxy> newObjects = GalaxyDataRepo.Galaxies();
+		newObjects = SituationalFilter.Filter(newObjects,
+											  data.Hemisphere,
+											  data.MinimumHeight,
+											  data.MaxSemiMajorAxis,
+											  data.MaxSemiMinorAxis
+		);
+
 		List<T> newObjectList;
 
 		if (data.SendViewports)

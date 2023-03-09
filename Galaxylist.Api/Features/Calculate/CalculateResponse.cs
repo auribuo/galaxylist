@@ -26,5 +26,6 @@ public class CalculateResponse
 	/// </summary>
 	public required List<Galaxy> GalaxyPath { get; set; }
 
+	public required List<Viewport> GalaxyPathViewports { get; set; }
 	public required List<Viewport> ViewportPath { get; set; }
 }

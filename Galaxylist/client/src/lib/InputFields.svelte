@@ -15,7 +15,7 @@
 
     const dispatch = createEventDispatcher<{
         submitted: { data: CalculateRequest, type: string }
-        calculate:  CalculateRequest
+        calculate: CalculateRequest
     }>();
     export let calculateRequest: CalculateRequest = new CalculateRequest()
     let type: "type" | "quality" = "type";
@@ -37,8 +37,8 @@
     }
 
 
-    async function handleCalculateClick(){
-        
+    async function handleCalculateClick() {
+
         dispatch('calculate', calculateRequest)
     }
 
@@ -111,7 +111,6 @@
             </div>
 
 
-            
             <!--TODO Remove-->
             <div class="inputWrapper">
                 <label class="formLabel">FOV Azimut Position [°]</label>
@@ -156,7 +155,6 @@
     </div>
 
     <Button on:click="{handleSubmitClick}">Hole Galaxien</Button>
-    <Button on:click="{handleCalculateClick}">Berechne Besten Weg</Button>
 </div>
 
 <style>
@@ -184,29 +182,28 @@
         align-items: center;
         justify-content: center;
     }
-    #plotType{
+
+    #plotType {
         margin-top: 12px;
     }
-    
+
 
     .inputWrapper {
         display: flex;
         justify-content: space-between;
         margin: 10px;
     }
-    
+
     .inputWrapper-nospace {
         display: flex;
         margin-right: 10px;
-        
+
     }
 
     .input {
         width: 100px;
-        
+
     }
-
-
 
 
 </style>

@@ -22,14 +22,14 @@ export class TimeZoneCache {
         return timeZoneInfo.gmtOffset;
     }
 
-    private static round(number: number, precision: number): number {
-        const factor = Math.pow(10, precision);
-        return Math.round(number * factor) / factor;
-    }
-
     private static hashKeyFor(location: LocationCoordinates, date: Date): string {
         const hashId = new Hashids("galaxylist", 8);
-        const key = `${TimeZoneCache.round(location.latitude, 2)}${TimeZoneCache.round(location.longitude, 2)}${Math.floor(date.getTime() / 1000000)}`;
+        const key = `${round(location.latitude, 2)}${round(location.longitude, 2)}${Math.floor(date.getTime() / 1000000)}`;
         return hashId.encode(key);
     }
+}
+
+export function round(number: number, precision: number): number {
+    const factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
 }

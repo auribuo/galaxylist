@@ -5,5 +5,6 @@
 </script>
 
 <main>
+    <h1>Galaxylist / Paolos Liste</h1>
     <GalaxyView bind:apiEndpoint={apiEndpoint} ></GalaxyView>
 </main>

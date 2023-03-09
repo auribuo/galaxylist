@@ -77,12 +77,19 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 				TotalQuality = filteredResults.Sum(g => g.Quality()),
 				TotalExposure = filteredResults.Sum(x => x.Exposure()),
 				MaxSearchSeconds = req.MaxSearchSeconds,
-				ExposureDeviation = Math.Abs(req.MaxSearchSeconds - filteredResults.Sum(x => x.Exposure())),
+				ExposureDeviation = req.MaxSearchSeconds - filteredResults.Sum(x => x.Exposure()),
 				GalaxyPath = filteredResults[0] switch
 				{
 					Galaxy => filteredResults.Cast<Galaxy>()
 											 .ToList(),
 					var _ => new List<Galaxy>(),
+				},
+				GalaxyPathViewports = filteredResults[0] switch
+				{
+					Galaxy => filteredResults.Cast<Galaxy>()
+											 .CalculateViewports(req.Fov, req.Location, req.ObservationStart)
+											 .ToList(),
+					var _ => new List<Viewport>(),
 				},
 				ViewportPath = filteredResults[0] switch
 				{

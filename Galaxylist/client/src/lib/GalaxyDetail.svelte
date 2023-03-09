@@ -2,6 +2,7 @@
     import {Galaxy} from "../shared/Galaxy.js";
     import {createEventDispatcher, onMount} from "svelte";
     import * as Plotly from "plotly.js-basic-dist-min"
+    import {round} from "../shared/TimeZoneCache.js";
 
     export let galaxy: Galaxy;
     export let type: "type" | "quality"
@@ -11,7 +12,7 @@
     function handleClosePanel() {
         dispatch("closePanel", type)
     }
-    
+
     Plotly.redraw("plot")
 </script>
 <h2>
@@ -28,7 +29,7 @@
     </tr>
     <tr>
         <td>Distance</td>
-        <td>{galaxy.distance} Mpc</td>
+        <td>{round(galaxy.distance, 2)} Mpc</td>
     </tr>
     <tr>
         <td>Magnitude</td>
@@ -40,15 +41,15 @@
     </tr>
     <tr>
         <td>Quality</td>
-        <td>{galaxy.quality}</td>
+        <td>{round(galaxy.quality, 2)}</td>
     </tr>
     <tr>
         <td>Azimuth</td>
-        <td>{galaxy.azimuthalCoordinate.azimuth}°</td>
+        <td>{round(galaxy.azimuthalCoordinate.azimuth, 2)}°</td>
     </tr>
     <tr>
         <td>Elevation</td>
-        <td>{galaxy.azimuthalCoordinate.height}°</td>
+        <td>{round(galaxy.azimuthalCoordinate.height, 2)}°</td>
     </tr>
     <tr>
         <td colspan="2">

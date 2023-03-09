@@ -17,6 +17,11 @@ public static class SituationalFilter
 					throw new ArgumentNullException(nameof(galaxy.AzimuthalCoordinate));
 				}
 
+				if (galaxy.Redshift <= 0)
+				{
+					return false;
+				}
+
 				AzimuthalCoordinate coordinate = galaxy.AzimuthalCoordinate.Value;
 
 				if (coordinate.Height < minHeight)
@@ -26,7 +31,7 @@ public static class SituationalFilter
 
 				if (galaxy.SemiMajorAxis > maxMajorAxis || galaxy.SemiMinorAxis > maxMinorAxis)
 				{
-					return false;
+					//return false;
 				}
 
 				return hemisphere switch

@@ -12,8 +12,9 @@
     import {Viewport} from "../shared/Viewport";
     import Aladin from "./Aladin.svelte";
     import {CalculateResponse} from "../shared/CalculateResponse";
+    import {round} from "../shared/TimeZoneCache.js";
 
-    
+
     const loadingText = "Lade..."
 
     export let apiEndpoint: string = ""
@@ -22,7 +23,8 @@
 
     let plotVisible: boolean = false
 
-    let galaxies: GalaxyResponse | null;
+    let galaxies: CalculateResponse | null;
+
     let isFovShown: boolean = false;
 
     let detailGalaxy: Galaxy | null = null
@@ -52,37 +54,37 @@
             type: 'scatter',
             mode: "lines",
             name: text,
-            line:{
+            line: {
                 color: color,
             },
-            
-            showlegend: text? true: false
+
+            showlegend: !!text
 
         }
     }
-   
-    async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse | null> {
-        try {
-            const resp = await axios.post<GalaxyResponse>(apiEndpoint+ "/galaxies", calculateRequest)
-            return resp.data as GalaxyResponse
-        } catch (e) {
-            window.alert("Fehler beim Laden der Galaxien: " + (e as AxiosError).message)
-            return null
-        }
-    }
 
- 
-    async function calculateGalaxies(calculateRequest: CalculateRequest){
+    async function getGalaxies(calculateRequest: CalculateRequest): Promise<CalculateResponse | null> {
         try {
-            const resp = await axios.post<CalculateResponse>(apiEndpoint+ "/calculate/alg", calculateRequest)
+            const resp = await axios.post<GalaxyResponse>(apiEndpoint + "/calculate/alg", calculateRequest)
             return resp.data as CalculateResponse
         } catch (e) {
             window.alert("Fehler beim Laden der Galaxien: " + (e as AxiosError).message)
             return null
         }
     }
-    
-    
+
+
+    async function calculateGalaxies(calculateRequest: CalculateRequest) {
+        try {
+            const resp = await axios.post<CalculateResponse>(apiEndpoint + "/calculate/alg", calculateRequest)
+            return resp.data as CalculateResponse
+        } catch (e) {
+            window.alert("Fehler beim Laden der Galaxien: " + (e as AxiosError).message)
+            return null
+        }
+    }
+
+
     const displayGalaxies = async (event: CustomEvent<{ data: CalculateRequest, type: "type" | "quality" }>) => {
         loading = loadingText
         galaxies = await getGalaxies(event.detail.data);
@@ -91,25 +93,25 @@
             return
         }
 
-        const data = groupGalaxies(galaxies, event.detail.type)
+        let data = groupGalaxies(galaxies.galaxyPath, event.detail.type)
 
-        if(galaxies.viewports != null) {
+        if (galaxies.galaxyPathViewports != null) {
             let threshold = 150
-            for (let viewport of galaxies.viewports) {
-
+            for (let viewport of galaxies.galaxyPathViewports) {
                 if (
                     Math.abs(viewport.topLeft.azimuth - viewport.topRight.azimuth) > threshold ||
                     Math.abs(viewport.topLeft.azimuth - viewport.bottomLeft.azimuth) > threshold ||
                     Math.abs(viewport.topLeft.azimuth - viewport.bottomRight.azimuth) > threshold ||
-                    galaxies.viewports.length < 1 ||
+                    galaxies.galaxyPathViewports.length < 1 ||
                     viewport.topLeft.height > 80
                 ) {
 
                 } else {
-                    data.push(createFovTrace(viewport, "red"))
+                    data = [...data, createFovTrace(viewport, "red")]
                 }
             }
         }
+
         let layout: Partial<Layout> = {
             xaxis: {
                 range: event.detail.data.hemisphere == "E" ? [0, 180] : [180, 360]
@@ -121,40 +123,41 @@
             title: 'Galaxien in Auswahl'
         };
 
+        console.log(data)
+        
         const config: Partial<Config> = {responsive: true, autosizable: true}
         const plot = await Plotly.newPlot('plot', data, layout, config);
         plot.on("plotly_click", (data) => {
             const x = data.points[0].x
             const y = data.points[0].y
-            detailGalaxy = galaxies.galaxies.find(g => g.azimuthalCoordinate.azimuth == x && g.azimuthalCoordinate.height == y)
+            detailGalaxy = galaxies.galaxyPath.find(g => g.azimuthalCoordinate.azimuth == x && g.azimuthalCoordinate.height == y)
         })
         loading = ""
-        
+
         plotVisible = true
     }
+
     async function animateViewports(plotDiv: string, data: CalculateResponse) {
-        
-        
-        
+
+console.log("animate")
         let fTrace = createFovTrace(data.viewportPath[0], "yellow", "Start")
-        let lTrace = createFovTrace(data.viewportPath[data.viewportPath.length-1], "green", "Ende")
-        Plotly.addTraces(plotDiv,fTrace,0)
-        Plotly.addTraces(plotDiv,lTrace,0)
-        
+        let lTrace = createFovTrace(data.viewportPath[data.viewportPath.length - 1], "green", "Ende")
+        await Plotly.addTraces(plotDiv, fTrace, 0)
+        await Plotly.addTraces(plotDiv, lTrace, 0)
+
         let firstTrace: Boolean = true
-        for(let viewport of data.viewportPath){
-            console.log(viewport)
-            if(firstTrace){
-               firstTrace=false 
-            }else{
-                Plotly.deleteTraces(plotDiv,0)
+        for (let viewport of data.viewportPath) {
+            if (firstTrace) {
+                firstTrace = false
+            } else {
+                await Plotly.deleteTraces(plotDiv, 0)
             }
             let trace = createFovTrace(viewport, "red")
-            Plotly.addTraces(plotDiv,trace,0)
+            await Plotly.addTraces(plotDiv, trace, 0)
             await sleep(1000);
         }
-        Plotly.deleteTraces(plotDiv, 0)
-        
+        await Plotly.deleteTraces(plotDiv, 0)
+
     }
 
 
@@ -162,55 +165,55 @@
         detailGalaxy = null
     }
 
-     async function  handleCalculateGalaxies(event: CustomEvent<CalculateRequest>){
-        try{
+    async function handleCalculateGalaxies(event: CustomEvent<CalculateRequest>) {
+        try {
             Plotly.purge('plot')
-        }catch (e) {
-            
-        }
-        
-        loading = loadingText
-         event.detail.sendViewports = true
-        let result: CalculateResponse = await calculateGalaxies(event.detail);
-                 
-      
-         const data: Data =  {
-                 x: result.path.map(galaxy => galaxy.azimuthalCoordinate.azimuth),
-                 y: result.path.map(galaxy => galaxy.azimuthalCoordinate.height),
-                 text: result.path.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
-                 name: "Galaxie",
-                 hoverinfo: "x+y+text",
-                 mode: "markers",
-                 type: "scatter",
-                 marker: {size: 5}
-             }
-             
-         let layout: Partial<Layout> = {
-             xaxis: {
-                 range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
-             },
-             yaxis: {
-                 scaleanchor: "x",
-                 range: [0, 90]
-             },
-             title: 'Galaxien in Auswahl'
-         };
+        } catch (e) {
 
-         const config: Partial<Config> = {responsive: true, autosizable: true}
-         const plot = await Plotly.newPlot('plot', [data], layout, config);
-         
-         plot.on("plotly_click", (data) => {
-             const x = data.points[0].x
-             const y = data.points[0].y
-             detailGalaxy = galaxies.galaxies.find(g => g.azimuthalCoordinate.azimuth == x && g.azimuthalCoordinate.height == y)
-         })
-         if(result.viewportPath!=undefined) {
-             animateViewports('plot', result);
-         }
-         
-         loading = ""
-         plotVisible = true
-    };
+        }
+
+        loading = loadingText
+        event.detail.sendViewports = true
+        let result: CalculateResponse = await calculateGalaxies(event.detail);
+
+
+        const data: Data = {
+            x: result.path.map(galaxy => galaxy.azimuthalCoordinate.azimuth),
+            y: result.path.map(galaxy => galaxy.azimuthalCoordinate.height),
+            text: result.path.map(galaxy => `UGC${galaxy.ugcNumber} (${galaxy.preferredName})`),
+            name: "Galaxie",
+            hoverinfo: "x+y+text",
+            mode: "markers",
+            type: "scatter",
+            marker: {size: 5}
+        }
+
+        let layout: Partial<Layout> = {
+            xaxis: {
+                range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
+            },
+            yaxis: {
+                scaleanchor: "x",
+                range: [0, 90]
+            },
+            title: 'Galaxien in Auswahl'
+        };
+
+        const config: Partial<Config> = {responsive: true, autosizable: true}
+        const plot = await Plotly.newPlot('plot', [data], layout, config);
+
+        plot.on("plotly_click", (data) => {
+            const x = data.points[0].x
+            const y = data.points[0].y
+            detailGalaxy = galaxies.galaxyPath.find(g => g.azimuthalCoordinate.azimuth == x && g.azimuthalCoordinate.height == y)
+        })
+        if (result.viewportPath != []) {
+            await animateViewports('plot', result);
+        }
+
+        loading = ""
+        plotVisible = true
+    }
 </script>
 <div id="galaxyView">
     <InputFields
@@ -224,21 +227,26 @@
             </div>
         </div>
     {/if}
+    {#if plotVisible}
+        <h2>
+            Errechete Qualität: {round(galaxies.totalQuality, 2)} aus {round(galaxies.galaxyPath.length, 2)} Galaxien
+        </h2>
+    {/if}
     <br/>
-    <div id="plotArea" >
+    <div id="plotArea">
         <div class="plotContainer">
             <div id="plot" class="galaxyPlot"></div>
         </div>
     </div>
-    
-   
+
+
     {#if detailGalaxy != null}
         <div class="galaxyInfo">
             <GalaxyDetail galaxy="{detailGalaxy}" type="quality"
                           on:closePanel={handleCloseDetailPanel}>
             </GalaxyDetail>
         </div>
-    
+
     {/if}
 </div>
 

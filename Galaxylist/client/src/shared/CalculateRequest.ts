@@ -26,8 +26,15 @@ export class CalculateRequest {
     minimumMinorAxis: number = 10;
     hemisphere: "W" | "E" = "W";
     
+    rasterApprox: number = 0.5;
     
-    sendViewports: boolean =false;
+    searchRadius: number = 20;
+    
+    maxSearchSeconds: number = 4 * 60 * 60;
+    
+    startPointCount: number = 10;
+    
+    sendViewports: boolean = false;
     
     refExposure: number = 60
 }

@@ -1,10 +1,11 @@
 import type {GalaxyResponse} from "./GalaxyResponse";
 import type {Data} from "plotly.js-basic-dist-min";
+import type {Galaxy} from "./Galaxy";
 
-function groupByQuality(data: GalaxyResponse): Data[] {
-    const less10 = data.galaxies.filter(g => g.quality < 10);
-    const between = data.galaxies.filter(g => g.quality >= 10 && g.quality <= 30);
-    const more30 = data.galaxies.filter(g => g.quality > 30);
+function groupByQuality(data: Galaxy[]): Data[] {
+    const less10 = data.filter(g => g.quality < 10);
+    const between = data.filter(g => g.quality >= 10 && g.quality <= 30);
+    const more30 = data.filter(g => g.quality > 30);
     return [
         {
             x: less10.map(g => g.azimuthalCoordinate.azimuth),
@@ -39,7 +40,7 @@ function groupByQuality(data: GalaxyResponse): Data[] {
     ]
 }
 
-export function groupGalaxies(data: GalaxyResponse, strategy: "type" | "quality"): Data[] {
+export function groupGalaxies(data: Galaxy[], strategy: "type" | "quality"): Data[] {
     if (strategy === "type") {
         return groupByType(data);
     } else {
@@ -47,11 +48,11 @@ export function groupGalaxies(data: GalaxyResponse, strategy: "type" | "quality"
     }
 }
 
-function groupByType(data: GalaxyResponse): Data[] {
+function groupByType(data: Galaxy[]): Data[] {
     const result: Data[] = [];
-    const types = new Set(data.galaxies.map(g => g.morphology));
+    const types = new Set(data.map(g => g.morphology));
     types.forEach(type => {
-        const galaxies = data.galaxies.filter(g => g.morphology === type);
+        const galaxies = data.filter(g => g.morphology === type);
         result.push({
             x: galaxies.map(g => g.azimuthalCoordinate.azimuth),
             y: galaxies.map(g => g.azimuthalCoordinate.height),
