@@ -45,7 +45,8 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 		int limit = Query<int>("limit", false);
 		FilterPipeline<Galaxy> pipeline = FilterPipeline<Galaxy>.New()
 			.With(new PositionFilter(req.MinimumHeight))
-			.With(new MeridianFilter(req.Hemisphere)).With(new SizeFilter(req.MaxSemiMajorAxis, req.MaxSemiMinorAxis));
+			.With(new MeridianFilter(req.Hemisphere));
+			//.With(new SizeFilter(req.MaxSemiMajorAxis, req.MaxSemiMinorAxis));
 
 		IEnumerable<Galaxy> galaxies = _repo.Galaxies()
 											.Select(g =>
@@ -57,16 +58,23 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 												}
 											);
 
+		
+		Console.WriteLine("Galaxies: "+ galaxies.ToList().Count);
 		List<Galaxy> galaxyList = pipeline.Filter(galaxies)
 										  .ToList();
-		
+
+		Console.WriteLine("GalaxyList before limit: "+ galaxyList.Count);
+
+
 		if (limit != 0)
 		{
 			galaxyList = galaxyList.Take(limit)
 								   .ToList();
 		}
 		
+
 		
+		Console.WriteLine("GalaxyList after limit: "+ galaxyList.Count);
 		GalaxyResponse ret = new GalaxyResponse()
 		{
 			Total = galaxyList.Count,
@@ -74,7 +82,7 @@ public class GalaxyFilterEndpoint : Endpoint<GalaxyFilterRequest, GalaxyResponse
 		};
 		if (req.SendViewports)
 		{
-			ret.Viewports = galaxyList.CalculateViewports(req.Fov,req.RasterApprox);
+			ret.Viewports = galaxyList.CalculateViewports(req.Fov,req.Location, req.ObservationStart,req.RasterApprox );
 		}
 		await SendAsync(ret
 		);
