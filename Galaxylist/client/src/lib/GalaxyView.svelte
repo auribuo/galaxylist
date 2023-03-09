@@ -10,6 +10,8 @@
     import {Galaxy} from "../shared/Galaxy";
     import GalaxyDetail from "./GalaxyDetail.svelte";
 
+    const loadingText = "Lade..."
+    
     export let apiEndpoint: string = ""
 
     let loading: string = ""
@@ -31,6 +33,7 @@
     }
 
     const displayGalaxies = async (event: CustomEvent<CalculateRequest>) => {
+        loading = loadingText
         galaxies = await getGalaxies(event.detail);
 
         const typeData = groupGalaxies(galaxies, "type")
@@ -48,7 +51,6 @@
         };
 
         const config = {responsive: true}
-        loading = "Loading..."
         const typePlot = await Plotly.newPlot('typePlot', typeData, layout, config);
         typePlot.on("plotly_click", (data) => {
             const x = data.points[0].x
@@ -103,7 +105,13 @@
             on:submitted={displayGalaxies}
             on:updateFov={updateFov}>
     </InputFields>
-    <div>{loading}</div>
+    {#if loading === loadingText}
+        <div class="loading">
+            <div class="loadingText">
+                {loading}
+            </div>
+        </div>
+    {/if}
     <br/>
     <div id="plotArea">
         <div class="plotContainer">
@@ -138,6 +146,19 @@
         justify-content: center;
 
         width: 100%;
+    }
+    
+    .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+    }
+    
+    .loadingText {
+        font-size: 2em;
     }
 
     #plotArea {
