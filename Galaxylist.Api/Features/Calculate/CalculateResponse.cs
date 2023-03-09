@@ -12,10 +12,10 @@ public class CalculateResponse
 	/// </summary>
 	public required int Total { get; set; }
 
+	public required double TotalQuality { get; set; }
+
 	/// <summary>
 	/// The list of galaxies calculated
 	/// </summary>
-	public required List<Galaxy> Galaxies { get; set; }
-	
-	
+	public required List<Galaxy> Path { get; set; }
 }
