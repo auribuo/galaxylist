@@ -52,6 +52,7 @@ public static class Program
 		);
 
 		app.UseSwaggerGen();
+		
 		ILogger<GalaxyDataRepo>? logger = app.Services.GetRequiredService<ILogger<GalaxyDataRepo>>();
 		logger.Log(LogLevel.Information, "Initializing data repo...");
 		Stopwatch stopwatch = new();
@@ -59,10 +60,14 @@ public static class Program
 		GalaxyDataRepo.Init(logger);
 		stopwatch.Stop();
 		logger.Log(LogLevel.Information, "Data repo initialized in {0}ms", stopwatch.ElapsedMilliseconds);
-
+		
 		//CalculateNeighbours.viewports();
-		
-		
+
+		/*DateTime time = new DateTime(2023,03,9,1,0,0);
+
+		EquatorialCoordinate coord = new EquatorialCoordinate{Declination = new Declination{Degrees = 90,Minutes = 0,Seconds = 0}, RightAscention = new RightAscention{Hours =1,Minutes = 0,Seconds = 0}};
+		coord.ToAzimuthal(time, new Location{Latitude = 47,Longitude = 12});
+		*/
 		
 		app.Run();
 	}

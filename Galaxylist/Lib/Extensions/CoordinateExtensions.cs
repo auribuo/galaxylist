@@ -18,14 +18,19 @@ public static partial class Extensions
 		dateTime = dateTime.ToUniversalTime();
 		double longitude = location.Longitude;
 		double latitude = location.Latitude;
-		double rektaszension = coordinate.RightAscention.ToDegree();
-		double deklination = coordinate.Declination.ToDegrees();
+		double rektaszension = (coordinate.RightAscention.ToDegree()+360)%360;
+		double deklination = (coordinate.Declination.ToDegrees()+360)%360;
 		double julianDate = ToJulianDate(dateTime);
 		double t = JulianDateDifferenceConstant(julianDate);
+		
+		
+		
 		double gmst0 = Gmst(t);
+		
 
 		// Konvertiere Uhrzeit in Grad
-		double timeOfDayDeg = (double)dateTime.Hour / 24 * 360;
+		double timeOfDayDeg = ((double)(dateTime.Hour+24)%24) / 24 * 360;
+
 
 		// Skaliere Uhrzeit auf Sternzeit
 		double timeOfDayRect = timeOfDayDeg * 1.00273790935;
@@ -34,39 +39,49 @@ public static partial class Extensions
 		double gmstT = (gmst0 + timeOfDayRect) % 360;
 		double lmst = Lmst(gmstT, longitude);
 		double stundenWinkel = lmst - rektaszension;
+		
+		stundenWinkel = (stundenWinkel + 360) % 360;
 
 		// Berechnet Höhenwinkel in Radianten
 		double hoehenWinkel = Math.Asin(Math.Sin(DegToRad(deklination)) * Math.Sin(DegToRad(latitude)) +
 										Math.Cos(DegToRad(latitude)) * Math.Cos(DegToRad(deklination)) * Math.Cos(DegToRad(stundenWinkel))
 		);
 
+		
+		
 		// Berechnet Azimut in Radianten
 		double azimut = Math.Atan(Math.Sin(DegToRad(stundenWinkel)) / (Math.Sin(DegToRad(latitude)) * Math.Cos(DegToRad(stundenWinkel)) -
 																	   Math.Cos(DegToRad(latitude)) * Math.Tan(DegToRad(deklination)))
 		);
 
+		
 		// Kontrolliert ob sich Stundenwinkel und Azimut im selben Quadranten befinden.
 		// Ist dies der Fall, werden dem Azimut 180° addiert. (Arctan hat 2 Lösungen)
 		double azimutDeg = RadToDeg(azimut);
-		azimutDeg = (azimutDeg + 360) % 360;
+		azimutDeg = (azimutDeg + 360*5) % 360;
 
+
+	
+		
 		if (GetQudrant(azimutDeg) == GetQudrant(stundenWinkel))
 		{
 			azimutDeg = (azimutDeg + 180) % 360;
 		}
+		
+		
 
 		/*Console.WriteLine("T: "+ t);
 		Console.WriteLine("Greenwich time: "+ gmstT);
 		Console.WriteLine("Datum: "+ julianDate);
 		Console.WriteLine("Deklination: "+ deklination);
-		Console.WriteLine("Rektazension: "+ rektazension);
+		Console.WriteLine("Rektazension: "+ rektaszension);
 		Console.WriteLine("Sternzeit: "+lmst);
 		Console.WriteLine("Stundenwinkel: "+stundenWinkel);
 		Console.WriteLine("Hoehenwinkel in Rad: "+hoehenWinkel);
 		Console.WriteLine("Azimut in Rad: "+azimut);
 		Console.WriteLine("Hohenwinkel in Grad: "+ RadToDeg(hoehenWinkel));
-		Console.WriteLine("Azimut in Grad: "+ azimutDeg);*/
-
+		Console.WriteLine("Azimut in Grad: "+ azimutDeg);
+		*/
 		return new AzimuthalCoordinate
 		{
 			Height = RadToDeg(hoehenWinkel),
@@ -82,7 +97,7 @@ public static partial class Extensions
 	{
 		return (angle % 360) switch
 		{
-			>= 0 and < 90    => 1,
+			>= 0 and <90    => 1,
 			>= 90 and < 180  => 2,
 			>= 180 and < 270 => 3,
 			>= 270 and < 360 => 4,
@@ -116,7 +131,7 @@ public static partial class Extensions
 	/// <returns>Star time at the location of the observer in degrees</returns>
 	private static double Lmst(double gmst, double longitude)
 	{
-		return gmst + longitude;
+		return (gmst + longitude)%360;
 	}
 
 	/// <summary>
@@ -138,7 +153,9 @@ public static partial class Extensions
 		// ToOADate konvertiert ein Datum zu OA Datum mit Referenz zum 30. Dezember 1899
 		// Das julianische Datum bezieht sich aber auf 4713 vor Christus.
 		// Diese Verschiebung wird mitmit +241018.5 berücksichtigt.
-		return date.ToOADate() + 2415018.5;
+		//return date.ToOADate() + 2415018.5;
+		DateTime reference = new DateTime(2023, 1, 1, 0, 0, 0);
+		return 2459946.5 + Math.Abs((reference - date).TotalDays);
 	}
 
 	/// <summary>

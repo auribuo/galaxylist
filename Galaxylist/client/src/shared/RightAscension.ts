@@ -1,5 +1,5 @@
 export interface RightAscension {
-    H: number;
-    M: number;
+    hours: number;
+    minutes: number;
     S: number;
 }

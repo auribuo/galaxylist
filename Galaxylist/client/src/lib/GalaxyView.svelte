@@ -11,6 +11,7 @@
     import GalaxyDetail from "./GalaxyDetail.svelte";
     import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
     import {Fov} from "../shared/Fov";
+    import {Viewport} from "../shared/Viewport";
 
     const loadingText = "Lade..."
     
@@ -24,28 +25,48 @@
     let typeDetailGalaxy: Galaxy | null;
     let qualityDetailGalaxy: Galaxy | null;
 
-    function createFovTrace(pos: AzimuthalCoordinate, fov: Fov): Data{
-        return {
+    function createFovTrace(viewport: Viewport): Data {
+        console.log(viewport)
+        /*return {
             y: [
-                pos.azimuth - fov.width / 2,
-                pos.azimuth + fov.width / 2,
-                pos.azimuth + fov.width / 2,
-                pos.azimuth - fov.width / 2,
-                pos.azimuth - fov.width / 2,
+                viewport.topLeft.height,
+                viewport.topRight.height,
+                viewport.bottomLeft.height,
+                viewport.bottomRight.height,
+                viewport.topLeft.height
             ],
             x: [
-                pos.height + fov.height / 2,
-                pos.height + fov.height / 2,
-                pos.height - fov.height / 2,
-                pos.height - fov.height / 2,
-                pos.height + fov.height / 2,
+                viewport.topLeft.azimuth,
+                viewport.topRight.azimuth,
+                viewport.bottomLeft.azimuth,
+                viewport.bottomRight.azimuth,
+                viewport.bottomLeft.azimuth,
             ],
             type: 'scatter',
             showlegend: false
             
+        }*/
+        console.log(viewport.galaxies)
+        return {
+            y: [
+                viewport.bottomRight.height,
+                viewport.bottomLeft.height,
+                viewport.topLeft.height,
+                viewport.topRight.height,
+                viewport.bottomRight.height,
+            ],
+            x: [
+                viewport.bottomRight.azimuth,
+                viewport.bottomLeft.azimuth,
+                viewport.topLeft.azimuth,
+                viewport.topRight.azimuth,
+                viewport.bottomRight.azimuth,
+            ],
+            type: 'scatter',
+     
+            showlegend: false
         }
     }
-    
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse> {
         try {
             const resp = await axios.post<GalaxyResponse>(apiEndpoint, calculateRequest)
@@ -63,14 +84,23 @@
         const typeData = groupGalaxies(galaxies, "type")
         
         const qualityData = groupGalaxies(galaxies, "quality")
-
+            const threshold = 150;
             if(galaxies.viewports != null){
             for(let viewport of galaxies.viewports){
-                typeData.push(createFovTrace(viewport.pos, event.detail.fov))
+             
+                    if (
+                        Math.abs(viewport.topLeft.azimuth - viewport.topRight.azimuth) > threshold ||
+                        Math.abs(viewport.topLeft.azimuth - viewport.bottomLeft.azimuth) > threshold ||
+                        Math.abs(viewport.topLeft.azimuth - viewport.bottomRight.azimuth) > threshold ||
+                        galaxies.viewports.length<1 ||
+                        viewport.topLeft.height > 80 
+                    ) {
+
+                    } else {
+                        typeData.push(createFovTrace(viewport))
+                    }
             }
         }
-
-
         let layout: Partial<Layout> = {
             xaxis: {
                 range: event.detail.hemisphere == "E" ? [0, 180] : [180, 360]
@@ -100,13 +130,13 @@
     }
     const updateFov = async (event: CustomEvent<FovViewPort>) => {
         let coord = event.detail;
-        let trace: Data = createFovTrace(coord.pos, coord.fov)
+        /*let trace: Data = createFovTrace(coord.pos, coord.fov)
 
        if(isFovShown){
             await Plotly.deleteTraces('galaxyPlot',0)
         }
         await Plotly.addTraces('galaxyPlot',[trace],0)
-        isFovShown=true
+        isFovShown=true*/
     };
 
     function handleCloseDetailPanel(type: CustomEvent<"type" | "quality">) {

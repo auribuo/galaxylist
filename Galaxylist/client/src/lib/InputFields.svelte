@@ -40,7 +40,14 @@
         fovPos.fov.width = calculateRequest.fov.width;
         dispatch('updateFov',fovPos)
     }
-    
+    /*
+    TODO
+    Löcher in Galaxien
+    Position der Kamera nach nachführung
+    Distanz mit spärischer Trigonometrie
+    Viewport korrigieren auf Ausrichtung
+    Kreisbogen berechnung in Dokumentation 
+     */
     
     let dateStr = calculateRequest.observationStartDate.toISOString().slice(0, 16);
 </script>
@@ -90,10 +97,19 @@
     <div class="inputUnitDiv"><input min="0" max="90" class="input " id="fovWeight" type="number"
                                      bind:value="{fovPos.pos.height}"/><span class="unit">°</span></div>
 
+    
     <label class="formLabel">Hole Viewports</label>
-    <div class="inputUnitDiv"><input class="input "  type="checkbox"
-                                     bind:checked="{calculateRequest.sendViewports}"/><span class="unit"></span></div>
-
+    <div class="inputUnitDiv">
+        <input class="input "  type="checkbox"
+                                     bind:checked="{calculateRequest.sendViewports}"/><span class="unit"></span>
+        <input class="input "  type="number"
+               bind:value="{calculateRequest.sendViewports}"/><span class="unit"></span>
+        <input class="input "  type="number"   placeholder="x"
+               bind:value="{calculateRequest.sendViewports}"/><span class="unit"></span>
+    
+    
+    </div>
+    
     <label class="formLabel">Belichtungszeit für UGC1</label>
     <div class="inputUnitDiv"><input min="0" class="input " id="refExposure" type="number"
                                      bind:value="{calculateRequest.refExposure}"/><span class="unit">s</span></div>
