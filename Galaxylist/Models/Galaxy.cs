@@ -1,12 +1,15 @@
 namespace Galaxylist.Models;
 
 using Dbscan;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Data model of a single galaxy.
 /// </summary>
-public class Galaxy : JsonStringer, IPointData
+public class Galaxy : JsonStringer, IPointData, IRatableObject
 {
+	public override string ToString() => JsonConvert.SerializeObject(this, Formatting.Indented);
+
 	private const int MAG_UGC2 = 17;
 	private const int DST_UGC2 = 268;
 	private const int BASE_TIME_UGC2 = 536;
@@ -105,11 +108,18 @@ public class Galaxy : JsonStringer, IPointData
 		};
 
 		double quality = typeWeigth * Math.Pow(10, (Magnitude - MAG_UGC2) / -2.5);
+		double heightWeight = AzimuthalCoordinate is null ? 1 : Math.Pow((AzimuthalCoordinate!.Value.Height - 30) / 60d, 1 / 3d);
+		quality *= heightWeight;
 
 		return quality * Convert.ToInt32(!_visited);
 	}
 
-	private double ExposureTime(double baseTime) => baseTime * Math.Pow(DST_UGC2 / Distance, 2);
+	/// <summary>
+	/// The calculated exposure time relative to the exposure time for UGC2.
+	/// </summary>
+	public double ExposureTime => CalculateExposureTime(BASE_TIME_UGC2);
+
+	private double CalculateExposureTime(double baseTime) => baseTime * Math.Pow(Distance / DST_UGC2, 2);
 
 	private static double SlewFunction(double distance) => 1 / 2d * distance + 6;
 
@@ -126,7 +136,7 @@ public class Galaxy : JsonStringer, IPointData
 	{
 		double slewTime = SlewFunction(adjustmentAngle);
 		double waitTime = slewTime / 1.5;
-		double exposureTime = ExposureTime(baseTime);
+		double exposureTime = CalculateExposureTime(baseTime);
 		double exposureTimeCheck = exposureTime / 2;
 
 		return cycleCount * (int)Math.Ceiling(slewTime + waitTime + exposureTime + READOUT_TIME + exposureTimeCheck + READOUT_TIME);
@@ -134,4 +144,15 @@ public class Galaxy : JsonStringer, IPointData
 
 	public Point Point =>
 		AzimuthalCoordinate is null ? new(-1, -1) : new(AzimuthalCoordinate!.Value.Azimuth, AzimuthalCoordinate!.Value.Height);
+
+	double IRatableObject.Quality() => Quality;
+
+	public double DistanceBetween(IRatableObject other) =>
+		Position()
+			.DistanceBetween(other.Position());
+
+	public double WaitTime(double distance) => CalculateExposure(distance);
+
+	public AzimuthalCoordinate Position() =>
+		AzimuthalCoordinate ?? throw new InvalidOperationException("The galaxy has no azimuthal coordinate");
 }

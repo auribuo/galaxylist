@@ -7,10 +7,12 @@ global using Microsoft.AspNetCore.Http;
 namespace Galaxylist.Api;
 
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 using Data.Repo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Processors;
 
 /// <summary>

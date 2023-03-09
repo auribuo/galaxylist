@@ -26,4 +26,11 @@ public struct AzimuthalCoordinate
 			Height = tuple.height,
 			Azimuth = tuple.azimuth
 		};
+
+	public double DistanceBetween(AzimuthalCoordinate other)
+	{
+		(double deltaHeight, double deltaAzimuth) = (Height - other.Height, Azimuth - other.Azimuth);
+
+		return Math.Acos(Math.Cos(deltaAzimuth) * Math.Cos(deltaHeight));
+	}
 }

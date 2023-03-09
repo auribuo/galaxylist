@@ -16,7 +16,7 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 	/// </summary>
 	public override void Configure()
 	{
-		Post("/calculate");
+		Post("/calculate/{strat}");
 		Description(endpoint =>
 			{
 				endpoint.Accepts<CalculateRequest>("application/json")
@@ -34,32 +34,34 @@ public class CalculateEndpoint : Endpoint<CalculateRequest, CalculateResponse>
 	/// <param name="ct">Cancellation token</param>
 	public override async Task HandleAsync(CalculateRequest req, CancellationToken ct)
 	{
-		int limit = Query<int>("limit", false);
+		string strat = Route<string>("strat")!;
+		var galaxies = GalaxyDataRepo.Galaxies()
+									 .Select(g =>
+										 {
+											 g.AzimuthalCoordinate = g.EquatorialCoordinate.ToAzimuthal(req.ObservationStart, req.Location);
 
-		IEnumerable<Galaxy> galaxies = GalaxyDataRepo.Galaxies()
-													 .Select(g =>
-														 {
-															 g.AzimuthalCoordinate =
-																 g.EquatorialCoordinate.ToAzimuthal(req.ObservationStart, req.Location);
+											 return g;
+										 }
+									 );
 
-															 return g;
-														 }
-													 );
-
-		List<Galaxy> galaxyList = SituationalFilter
-								  .Filter(galaxies, req.Hemisphere, req.MinimumHeight, req.MaxSemiMajorAxis, req.MaxSemiMinorAxis)
-								  .ToList();
-
-		if (limit != 0)
+		galaxies = SituationalFilter.Filter(galaxies, req.Hemisphere, req.MinimumHeight, req.MaxSemiMajorAxis, req.MaxSemiMinorAxis);
+		List<Galaxy> galaxyList = (strat switch
 		{
-			galaxyList = galaxyList.Take(limit)
-								   .ToList();
-		}
+			"alg" => GenericFilter.Filter(galaxies, new GalaxyRepo(), req.ObservationStart, 20)
+								  .ToList(),
+			"rng" => RandomFilter.Filter(galaxies),
+			var _ => throw new ArgumentException($"Invalid strategy: {strat}", nameof(strat)),
+		}).ToList();
+
+		GalaxyDataRepo.Galaxies()
+					  .ToList()
+					  .ForEach(x => x.Reset());
 
 		await SendAsync(new CalculateResponse
 			{
 				Total = galaxyList.Count,
-				Galaxies = galaxyList,
+				TotalQuality = galaxyList.Sum(g => g.Quality),
+				Path = galaxyList,
 			}
 		);
 	}
