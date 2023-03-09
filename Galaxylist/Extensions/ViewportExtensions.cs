@@ -24,12 +24,13 @@ public static partial class Extensions
 		}
 
 		//Console.WriteLine("Nearest: "+nearestDeg);
+		
 		return nearestDeg;
 	}
 
-	private static bool IsInViewport(AzimuthalCoordinate pos, Fov fov, AzimuthalCoordinate viewportPos) =>
-		viewportPos.Azimuth - fov.Width / 2 < pos.Azimuth && viewportPos.Azimuth + fov.Width / 2 > pos.Azimuth &&
-		viewportPos.Height - fov.Height / 2 < pos.Height && viewportPos.Height + fov.Height / 2 > pos.Height;
+	private static bool IsInViewport(EquatorialCoordinate pos, Fov fov, EquatorialCoordinate viewportPos) =>
+		viewportPos.RightAscention.ToDegree() - fov.Width / 2 < pos.RightAscention.ToDegree() && viewportPos.RightAscention.ToDegree() + fov.Width / 2 > pos.RightAscention.ToDegree() &&
+		viewportPos.Declination.ToDegrees() - fov.Height / 2 < pos.Declination.ToDegrees() && viewportPos.Declination.ToDegrees() + fov.Height / 2 > pos.Declination.ToDegrees();
 
 	/// <summary>
 	/// Calculates interesting viewports with galaxies in them. Viewports are approximated to the nearest number at  x * fov.Height * rasterApprox and x* fov.Width *rasterApprox
@@ -38,22 +39,23 @@ public static partial class Extensions
 	/// <param name="fov">Viewport of the camera on the telescope</param>
 	/// <param name="rasterApprox">Approximation factor which represents the fraction in which the fov position is approximated relative to the size of the fov.</param>
 	/// <returns>A list of viewports. One galaxy can be in multiple viewports</returns>
-	public static List<Viewport> CalculateViewports(this List<Galaxy> galaxies, Fov fov, double rasterApprox = 0.25)
+	public static List<Viewport> CalculateViewports(this List<Galaxy> galaxies, Fov fov, Location? location =null, DateTime? time =null,double rasterApprox = 0.25)
 	{
 		Dictionary<(double, double), Viewport> viewports = new();
 		double xStep = fov.Width * rasterApprox;
 		double yStep = fov.Height * rasterApprox;
 		int nXStep = (int)(fov.Width / xStep) / 2;
 		int nYStep = (int)(fov.Height / yStep) / 2;
-		Console.WriteLine(fov.Height);
+		
+		/*Console.WriteLine(fov.Height);
 		Console.WriteLine(fov.Width);
 		Console.WriteLine(xStep);
-		Console.WriteLine(yStep);
+		Console.WriteLine(yStep);*/
 	
 		foreach (Galaxy galaxy in galaxies)
 		{
-			double xApprox = GetNearestDeg(galaxy.AzimuthalCoordinate!.Value.Azimuth, xStep);
-			double yApprox = GetNearestDeg(galaxy.AzimuthalCoordinate.Value.Height, yStep);
+			double xApprox = GetNearestDeg(galaxy.EquatorialCoordinate.RightAscention.ToDegree(), xStep);
+			double yApprox = GetNearestDeg(galaxy.EquatorialCoordinate.Declination.ToDegrees(), yStep);
 
 			try
 			{
@@ -66,16 +68,71 @@ public static partial class Extensions
 				{
 					Pos = (xApprox, yApprox),
 				};
+				
 
 				viewport.Galaxies.Add(galaxy);
+				
+				if (location is not null && time is not null)
+				{
+
+					/*Console.WriteLine("New Galaxy");
+					
+					Console.WriteLine("Equatorial Galaxy");
+					Console.WriteLine(galaxy.EquatorialCoordinate.RightAscention.ToDegree());
+					Console.WriteLine(galaxy.EquatorialCoordinate.Declination.ToDegrees());
+					Console.WriteLine("Equatorial Nearest Point in Raster");
+					Console.WriteLine(viewport.Pos.RightAscention.ToDegree());
+					Console.WriteLine(viewport.Pos.Declination.ToDegrees());
+					Console.WriteLine(xApprox);
+					Console.WriteLine(yApprox);
+					Console.WriteLine("Azimuthal Galaxy");
+					Console.WriteLine(galaxy.EquatorialCoordinate.ToAzimuthal(time.Value, location).Azimuth);
+					Console.WriteLine(galaxy.EquatorialCoordinate.ToAzimuthal(time.Value, location).Height);
+					Console.WriteLine("Azimuthal Nearest Point in Raster");
+					Console.WriteLine(viewport.Pos.ToAzimuthal(time.Value, location).Azimuth);
+					Console.WriteLine(viewport.Pos.ToAzimuthal(time.Value, location).Height);*/
+					
+					EquatorialCoordinate topLeft = (
+						viewport.Pos.RightAscention.ToDegree() - fov.Width ,
+						viewport.Pos.Declination.ToDegrees() + fov.Height );
+					EquatorialCoordinate topRight = (
+						viewport.Pos.RightAscention.ToDegree() + fov.Width ,
+						viewport.Pos.Declination.ToDegrees() + fov.Height );
+					EquatorialCoordinate bottomLeft = (
+						viewport.Pos.RightAscention.ToDegree() - fov.Width ,
+						viewport.Pos.Declination.ToDegrees() - fov.Height );
+					EquatorialCoordinate bottomRight = (
+						viewport.Pos.RightAscention.ToDegree() + fov.Width ,
+						viewport.Pos.Declination.ToDegrees() - fov.Height);
+					
+					viewport.TopLeft = topLeft.ToAzimuthal(time.Value, location);
+					viewport.TopRight = topRight.ToAzimuthal(time.Value, location);
+					viewport.BottomLeft = bottomLeft.ToAzimuthal(time.Value, location);
+					viewport.BottomRight = bottomRight.ToAzimuthal(time.Value, location);
+					/*
+					Console.WriteLine("Links");
+					Console.WriteLine("Azimut: "+viewport.TopLeft.Azimuth);
+					Console.WriteLine("Höhe: "+viewport.TopLeft.Height);
+					Console.WriteLine("Declination: "+topLeft.Declination.ToDegrees());
+					Console.WriteLine("RightAscention: "+topLeft.RightAscention.ToDegree());
+					
+					Console.WriteLine("Rechts");
+					Console.WriteLine("Azimut: "+viewport.TopRight.Azimuth);
+					Console.WriteLine("Höhe: "+viewport.TopRight.Height);
+					Console.WriteLine("Declination: "+topRight.Declination.ToDegrees());
+					Console.WriteLine("RightAscention: "+topRight.RightAscention.ToDegree());*/
+					
+					viewport.AzimuthalPos = viewport.Pos.ToAzimuthal(time.Value, location);
+				}
+				
 				viewports[(xApprox, yApprox)] = viewport;
 			}
 
-			for (double ySearch = yApprox - nYStep * yStep; ySearch < yApprox + nYStep * yStep; ySearch += yStep)
+			/*for (double ySearch = yApprox - nYStep * yStep; ySearch < yApprox + nYStep * yStep; ySearch += yStep)
 			{
 				for (double xSearch = xApprox - nXStep * xStep; xSearch < xApprox + nXStep * xStep; xSearch += xStep)
 				{
-					if (!IsInViewport(galaxy.AzimuthalCoordinate.Value, fov, (xSearch, ySearch)) ||
+					if (!IsInViewport(galaxy.EquatorialCoordinate, fov, (xSearch, ySearch)) ||
 					    (Math.Abs(xSearch - xApprox) > 0.000002 && Math.Abs(ySearch - yApprox) > 0.000002))
 					{
 						continue;
@@ -94,10 +151,30 @@ public static partial class Extensions
 						};
 
 						viewport.Galaxies.Add(galaxy);
+
+						
+						if (location is not null && time is not null)
+						{
+							EquatorialCoordinate topLeft = (viewport.Pos.RightAscention.ToDegree() - fov.Width / 2,
+								viewport.Pos.Declination.ToDegrees() + fov.Height / 2);
+							EquatorialCoordinate topRight = (viewport.Pos.RightAscention.ToDegree() + fov.Width / 2,
+								viewport.Pos.Declination.ToDegrees() + fov.Height / 2);
+							EquatorialCoordinate bottomLeft = (viewport.Pos.RightAscention.ToDegree() - fov.Width / 2,
+								viewport.Pos.Declination.ToDegrees() - fov.Height / 2);
+							;
+							EquatorialCoordinate bottomRight = (viewport.Pos.RightAscention.ToDegree() + fov.Width / 2,
+								viewport.Pos.Declination.ToDegrees() + fov.Height / 2);
+							;
+							viewport.TopLeft = topLeft.ToAzimuthal(time.Value, location);
+							viewport.TopRight = topRight.ToAzimuthal(time.Value, location);
+							viewport.BottomLeft = bottomLeft.ToAzimuthal(time.Value, location);
+							viewport.BottomRight = bottomRight.ToAzimuthal(time.Value, location);
+						}
+
 						viewports[(xSearch, ySearch)] = viewport;
 					}
 				}
-			}
+			}*/
 		}
 
 		foreach (Galaxy galaxy in galaxies)
@@ -109,12 +186,11 @@ public static partial class Extensions
 			{
 				for (double xSearch = xApprox - nXStep * xStep; xSearch < xApprox + nXStep * xStep; xSearch += xStep)
 				{
-					if (!IsInViewport(galaxy.AzimuthalCoordinate.Value, fov, (xSearch, ySearch)) ||
+					if (!IsInViewport(galaxy.EquatorialCoordinate, fov, (xSearch, ySearch)) ||
 					    (Math.Abs(xSearch - xApprox) > 0.000002 && Math.Abs(ySearch - yApprox) > 0.000002))
 					{
 						continue;
 					}
-
 					try
 					{
 						if (viewports[(xSearch, ySearch)]
@@ -130,6 +206,7 @@ public static partial class Extensions
 				}
 			}
 		}
+		
 
 		return new List<Viewport>(viewports.Values);
 	}

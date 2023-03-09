@@ -1,5 +1,5 @@
 export default class Degree {
-    D: number = 0;
-    M: number = 0;
+    degrees: number = 0;
+    minutes: number = 0;
     S: number = 0;
 }

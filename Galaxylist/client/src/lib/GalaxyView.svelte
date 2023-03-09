@@ -11,8 +11,10 @@
     import GalaxyDetail from "./GalaxyDetail.svelte";
     import {AzimuthalCoordinate} from "../shared/AzimuthalCoordinate";
     import {Fov} from "../shared/Fov";
+    import {Viewport} from "../shared/Viewport";
     import Aladin from "./Aladin.svelte";
 
+    
     const loadingText = "Lade..."
 
     export let apiEndpoint: string = ""
@@ -29,25 +31,26 @@
     function createFovTrace(pos: AzimuthalCoordinate, fov: Fov): Data {
         return {
             y: [
-                pos.azimuth - fov.width / 2,
-                pos.azimuth + fov.width / 2,
-                pos.azimuth + fov.width / 2,
-                pos.azimuth - fov.width / 2,
-                pos.azimuth - fov.width / 2,
+                viewport.bottomRight.height,
+                viewport.bottomLeft.height,
+                viewport.topLeft.height,
+                viewport.topRight.height,
+                viewport.bottomRight.height,
             ],
             x: [
-                pos.height + fov.height / 2,
-                pos.height + fov.height / 2,
-                pos.height - fov.height / 2,
-                pos.height - fov.height / 2,
-                pos.height + fov.height / 2,
+                viewport.bottomRight.azimuth,
+                viewport.bottomLeft.azimuth,
+                viewport.topLeft.azimuth,
+                viewport.topRight.azimuth,
+                viewport.bottomRight.azimuth,
             ],
             type: 'scatter',
+     
             showlegend: false
 
         }
     }
-
+   
     async function getGalaxies(calculateRequest: CalculateRequest): Promise<GalaxyResponse | null> {
         try {
             const resp = await axios.post<GalaxyResponse>(apiEndpoint, calculateRequest)
@@ -68,13 +71,27 @@
 
         const data = groupGalaxies(galaxies, event.detail.type)
 
+        if(galaxies.viewports != null){
+            for(let viewport of galaxies.viewports){
+
+                if (
+                    Math.abs(viewport.topLeft.azimuth - viewport.topRight.azimuth) > threshold ||
+                    Math.abs(viewport.topLeft.azimuth - viewport.bottomLeft.azimuth) > threshold ||
+                    Math.abs(viewport.topLeft.azimuth - viewport.bottomRight.azimuth) > threshold ||
+                    galaxies.viewports.length<1 ||
+                    viewport.topLeft.height > 80
+                ) {
+
+                } else {
+                    typeData.push(createFovTrace(viewport))
+                }
+            }
+        
         if (galaxies.viewports != null) {
             for (let viewport of galaxies.viewports) {
                 data.push(createFovTrace(viewport.pos, event.detail.data.fov))
             }
         }
-
-
         let layout: Partial<Layout> = {
             xaxis: {
                 range: event.detail.data.hemisphere == "E" ? [0, 180] : [180, 360]

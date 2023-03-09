@@ -15,4 +15,13 @@ public class EquatorialCoordinate
 	/// The declination of the object in the sky.
 	/// </summary>
 	public Declination Declination { get; init; }
+	
+	
+	
+	public static implicit operator EquatorialCoordinate((double rightAscention, double declination) tuple) =>
+		new()
+		{
+			Declination = tuple.declination.ToDeclination(),
+			RightAscention = tuple.rightAscention.ToRightAscention(),
+		};
 }
