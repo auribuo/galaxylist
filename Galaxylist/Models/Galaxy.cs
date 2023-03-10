@@ -119,8 +119,13 @@ public class Galaxy : IPointData, IRatableObject
 		};
 
 		double quality = typeWeigth * Math.Pow(10, (Magnitude - MAG_UGC2) / -2.5);
-		double heightWeight = AzimuthalCoordinate is null ? 1 : Math.Pow((AzimuthalCoordinate!.Value.Height - 30) / 60d, 1 / 3d);
-		quality *= heightWeight;
+
+		if (AzimuthalCoordinate is not null)
+		{
+			double height = AzimuthalCoordinate.Value.Height;
+			double heightWeight = Math.Pow((height - 30) / 60d, 1 / 3d);
+			quality *= heightWeight;
+		}
 
 		return quality * Convert.ToInt32(!_visited);
 	}
